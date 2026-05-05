@@ -1,0 +1,14 @@
+URL SCAM ANALYSIS REPORT
+========================
+URL: https://example.com/login
+Risk Level: LOW (3/10)
+
+DETECTED INDICATORS:
+- Credential bait
+
+WHY THIS MATTERS:
+- The URL includes account or login language commonly used in scams.
+
+RECOMMENDATIONS:
+- Likely safe, but still verify unexpected requests
+- Use normal caution before opening links
