@@ -1,0 +1,20 @@
+From: noreply@github.com
+Subject: You have a new notification on GitHub
+To: user@example.com
+Date: Wed, 7 May 2025 15:45:22 UTC
+
+Hi user,
+
+You received a notification on GitHub.
+
+View it on GitHub: https://github.com/notifications
+
+---
+
+You're receiving this email because you're watching this repository.
+
+Manage your notification settings: https://github.com/settings/notifications
+
+GitHub
+88 Colin P Kelly Jr St
+San Francisco, CA 94107 USA

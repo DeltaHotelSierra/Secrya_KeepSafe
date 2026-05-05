@@ -1,0 +1,18 @@
+From: "Bank Support" <support@your-bank.com>
+Subject: URGENT: Verify Your Account Immediately
+To: user@example.com
+Date: Wed, 7 May 2025 14:23:00 -0500
+
+Dear Valued Customer,
+
+We have detected suspicious activity on your account. Your access will be REVOKED in 24 hours unless you verify your identity immediately.
+
+Click the link below to verify your account:
+
+https://verify-bank-account-security.com/login
+
+Do not delay. Your account security depends on immediate action.
+
+Best regards,
+Bank Support Team
+support@your-bank.com
