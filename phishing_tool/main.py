@@ -15,7 +15,14 @@ def main() -> None:
         print(ui.create_banner())
         parser = cli.setup_parser()
         args = parser.parse_args()
-        if any([args.analyze, args.analyze_url, args.generate_template, args.interactive]):
+        if any([
+            args.analyze,
+            args.analyze_eml,
+            args.analyze_raw,
+            args.analyze_url,
+            args.generate_template,
+            args.interactive,
+        ]):
             cli.run_from_args(args)
         else:
             cli.handle_interactive_menu()

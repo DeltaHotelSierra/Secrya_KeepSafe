@@ -1,3 +1,5 @@
+from email import policy
+from email.parser import BytesParser, Parser
 import ipaddress
 import re
 from urllib.parse import urlparse
@@ -5,6 +7,9 @@ from urllib.parse import urlparse
 
 def _extract_header(email_text: str, header_name: str) -> str:
     """Return the value of the first occurrence of a header in the email text."""
+    parsed_header = _extract_parsed_header(email_text, header_name)
+    if parsed_header:
+        return parsed_header
     try:
         pattern = rf"^{header_name}:\s*(.*)$"
         match = re.search(pattern, email_text, re.IGNORECASE | re.MULTILINE)
@@ -13,11 +18,66 @@ def _extract_header(email_text: str, header_name: str) -> str:
         return ""
 
 
+def _parse_email(email_text: str):
+    """Parse email text into a message object when possible."""
+    if not email_text:
+        return None
+
+    try:
+        raw_bytes = email_text.encode("utf-8", errors="replace")
+        return BytesParser(policy=policy.default).parsebytes(raw_bytes)
+    except Exception:
+        try:
+            return Parser(policy=policy.default).parsestr(email_text)
+        except Exception:
+            return None
+
+
+def _extract_parsed_header(email_text: str, header_name: str) -> str:
+    """Extract a header value using Python's email parser first."""
+    message = _parse_email(email_text)
+    if not message:
+        return ""
+    try:
+        value = message.get(header_name)
+        return str(value).strip() if value else ""
+    except Exception:
+        return ""
+
+
+def _extract_body_text(email_text: str) -> str:
+    """Return the text body extracted from a raw email when available."""
+    message = _parse_email(email_text)
+    if not message:
+        return email_text
+
+    try:
+        if message.is_multipart():
+            parts = []
+            for part in message.walk():
+                if part.get_content_maintype() == "multipart":
+                    continue
+                if part.get_content_type() != "text/plain":
+                    continue
+                payload = part.get_content()
+                if isinstance(payload, str):
+                    parts.append(payload)
+            return "\n".join(parts).strip() or email_text
+
+        payload = message.get_content()
+        if isinstance(payload, str):
+            return payload.strip() or email_text
+        return email_text
+    except Exception:
+        return email_text
+
+
 def _extract_urls(email_text: str) -> list:
     """Return the list of URLs found in the email text."""
     if not email_text:
         return []
-    return re.findall(r"https?://[\w\-._~:/?#[\]@!$&'()*+,;=%]+", email_text)
+    body = _extract_body_text(email_text)
+    return re.findall(r"https?://[\w\-._~:/?#[\]@!$&'()*+,;=%]+", body)
 
 
 def _domain_from_email_address(address: str) -> str:
@@ -72,7 +132,7 @@ def check_urgency_language(email_text: str) -> dict:
 
     keywords = ["immediately", "urgent",
                 "now", "24 hours", "verify", "revoked"]
-    lowered = email_text.lower()
+    lowered = _extract_body_text(email_text).lower()
     found = [keyword for keyword in keywords if keyword in lowered]
 
     if not found:

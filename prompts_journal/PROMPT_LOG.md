@@ -26,7 +26,9 @@ right we need to clean up all useless code and duplicates first then we need to 
 
 # 2nd Prompt
 
+daniel santos 
 
+we need to imprement a way to allow the user the test there own emails from there own mail clients
 
 
     

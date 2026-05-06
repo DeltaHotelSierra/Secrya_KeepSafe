@@ -25,6 +25,17 @@ def setup_parser() -> argparse.ArgumentParser:
         help="Analyze an email file for phishing indicators (provide file path)",
     )
     parser.add_argument(
+        "--analyze-eml",
+        dest="analyze_eml",
+        help="Analyze an exported .eml file from your mail client (provide file path)",
+    )
+    parser.add_argument(
+        "--analyze-raw",
+        action="store_true",
+        dest="analyze_raw",
+        help="Paste raw email source from your mail client and analyze it",
+    )
+    parser.add_argument(
         "--analyze-url",
         dest="analyze_url",
         help="Analyze a URL for scam indicators (provide url)",
@@ -80,7 +91,28 @@ def _read_backable_choice(prompt_text: str, max_choice: int) -> int | None:
 
 def _load_text_file(file_path: Path) -> str:
     """Load a UTF-8 text file from disk."""
-    return file_path.read_text(encoding="utf-8")
+    return file_path.read_text(encoding="utf-8", errors="replace")
+
+
+def _load_eml_file(file_path: Path) -> str:
+    """Load an EML file as bytes and decode to text for parsing."""
+    return file_path.read_bytes().decode("utf-8", errors="replace")
+
+
+def _read_raw_email_from_stdin() -> str:
+    """Read a pasted raw email source from stdin until a sentinel line."""
+    ui.print_header("Paste Raw Email Source")
+    ui.print_colored(
+        "Paste the full email source from your mail client.", "WHITE")
+    ui.print_colored(
+        "End input with a line containing only END.", "WHITE")
+    lines = []
+    while True:
+        line = input()
+        if line.strip() == "END":
+            break
+        lines.append(line)
+    return "\n".join(lines).strip()
 
 
 def _show_report_and_save(report_text: str, report_name: str) -> None:
@@ -122,6 +154,49 @@ def handle_email_file_menu() -> None:
             analysis_result, str(selected_file.name))
         _show_report_and_save(report_text, f"email_{selected_file.stem}")
         return
+
+
+def handle_mail_client_email_menu() -> None:
+    """Analyze user-provided emails exported from common mail clients."""
+    while True:
+        ui.print_header("Analyze Your Own Email")
+        ui.print_colored("1. Analyze exported .eml file", "BLUE")
+        ui.print_colored("2. Paste raw email source", "BLUE")
+        ui.print_colored("B. Back", "WHITE")
+
+        choice = input("Select option: ").strip().lower()
+        if choice in {"b", "back", "q", "quit"}:
+            return
+
+        if choice == "1":
+            eml_path = input("Path to .eml file: ").strip()
+            if eml_path.lower() in {"b", "back", "q", "quit"}:
+                continue
+            if not validate_file_path(eml_path):
+                ui.print_warning(f"File not found: {eml_path}")
+                continue
+
+            selected_file = Path(eml_path)
+            content = _load_eml_file(selected_file)
+            analysis_result = analysis.analyze_email(content)
+            report_text = report.format_report(
+                analysis_result, str(selected_file))
+            _show_report_and_save(
+                report_text, f"mail_client_{selected_file.stem}")
+            return
+
+        if choice == "2":
+            raw_content = _read_raw_email_from_stdin()
+            if not raw_content:
+                ui.print_warning("No raw email content detected.")
+                continue
+            analysis_result = analysis.analyze_email(raw_content)
+            report_text = report.format_report(
+                analysis_result, "Raw pasted email source")
+            _show_report_and_save(report_text, "mail_client_pasted_email")
+            return
+
+        ui.print_warning("Select a valid option.")
 
 
 def handle_url_menu() -> None:
@@ -199,22 +274,46 @@ def handle_interactive_menu() -> None:
     """Show the main menu and route each option to its submenu."""
     while True:
         print(ui.create_interactive_menu())
-        choice = _read_choice("Choice: ", {"1", "2", "3", "4", "5"})
+        choice = _read_choice("Choice: ", {"1", "2", "3", "4", "5", "6"})
         if choice == "1":
             handle_email_file_menu()
         elif choice == "2":
-            handle_url_menu()
+            handle_mail_client_email_menu()
         elif choice == "3":
-            handle_template_menu()
+            handle_url_menu()
         elif choice == "4":
-            handle_recent_reports_menu()
+            handle_template_menu()
         elif choice == "5":
+            handle_recent_reports_menu()
+        elif choice == "6":
             ui.print_info("Exiting...")
             return
 
 
 def run_from_args(args: argparse.Namespace) -> None:
     """Run the non-interactive command selected by parsed arguments."""
+    if args.analyze_eml:
+        if not validate_file_path(args.analyze_eml):
+            ui.print_error(f"File not found: {args.analyze_eml}")
+            return
+        selected_file = Path(args.analyze_eml)
+        content = _load_eml_file(selected_file)
+        analysis_result = analysis.analyze_email(content)
+        report_text = report.format_report(analysis_result, str(selected_file))
+        _show_report_and_save(report_text, f"mail_client_{selected_file.stem}")
+        return
+
+    if args.analyze_raw:
+        raw_content = _read_raw_email_from_stdin()
+        if not raw_content:
+            ui.print_error("No raw email content detected.")
+            return
+        analysis_result = analysis.analyze_email(raw_content)
+        report_text = report.format_report(
+            analysis_result, "Raw pasted email source")
+        _show_report_and_save(report_text, "mail_client_pasted_email")
+        return
+
     if args.analyze:
         if not validate_file_path(args.analyze):
             ui.print_error(f"File not found: {args.analyze}")
@@ -247,7 +346,14 @@ def run_from_args(args: argparse.Namespace) -> None:
 if __name__ == "__main__":
     parser = setup_parser()
     parsed_args = parser.parse_args()
-    if any([parsed_args.analyze, parsed_args.analyze_url, parsed_args.generate_template, parsed_args.interactive]):
+    if any([
+        parsed_args.analyze,
+        parsed_args.analyze_eml,
+        parsed_args.analyze_raw,
+        parsed_args.analyze_url,
+        parsed_args.generate_template,
+        parsed_args.interactive,
+    ]):
         run_from_args(parsed_args)
     else:
         parser.print_help()

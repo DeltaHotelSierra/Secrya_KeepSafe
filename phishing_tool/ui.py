@@ -99,10 +99,12 @@ def create_interactive_menu() -> str:
     header = Style.BRIGHT + Fore.CYAN + "=== PHISHING ANALYSIS TOOL ==="
     options = (
         Fore.BLUE + "1. " + Fore.WHITE + "Analyze email file\n"
-        + Fore.BLUE + "2. " + Fore.WHITE + "Analyze URL\n"
-        + Fore.BLUE + "3. " + Fore.WHITE + "Generate phishing template\n"
-        + Fore.BLUE + "4. " + Fore.WHITE + "View recent reports\n"
-        + Fore.BLUE + "5. " + Fore.WHITE + "Exit\n"
+        + Fore.BLUE + "2. " + Fore.WHITE +
+        "Analyze your own email (mail client)\n"
+        + Fore.BLUE + "3. " + Fore.WHITE + "Analyze URL\n"
+        + Fore.BLUE + "4. " + Fore.WHITE + "Generate phishing template\n"
+        + Fore.BLUE + "5. " + Fore.WHITE + "View recent reports\n"
+        + Fore.BLUE + "6. " + Fore.WHITE + "Exit\n"
     )
     return header + "\n" + options
 
