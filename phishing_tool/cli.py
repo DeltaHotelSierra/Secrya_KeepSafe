@@ -1,44 +1,33 @@
 import argparse
+import os
+import re
+from datetime import datetime
 from pathlib import Path
 
 try:
-    from . import analysis, report, templates, ui
+    from . import ui, analysis, templates, report, url_security
 except ImportError:  # pragma: no cover - support direct script execution
-    import analysis
-    import report
-    import templates
     import ui
-
-
-BASE_DIR = Path(__file__).resolve().parent
-TEST_DATA_DIR = BASE_DIR / "test_data"
+    import analysis
+    import templates
+    import report
+    import url_security
 
 
 def setup_parser() -> argparse.ArgumentParser:
     """Create and return the argparse.ArgumentParser for the tool."""
     parser = argparse.ArgumentParser(
-        description="Phishing Analysis Tool - analyze emails, URLs, and generate templates"
+        description="Phishing Analysis Tool - analyze emails and generate templates"
     )
     parser.add_argument(
         "--analyze",
         dest="analyze",
-        help="Analyze an email file for phishing indicators (provide file path)",
-    )
-    parser.add_argument(
-        "--analyze-eml",
-        dest="analyze_eml",
-        help="Analyze an exported .eml file from your mail client (provide file path)",
-    )
-    parser.add_argument(
-        "--analyze-raw",
-        action="store_true",
-        dest="analyze_raw",
-        help="Paste raw email source from your mail client and analyze it",
+        help="Analyze email file for phishing indicators (provide file path)",
     )
     parser.add_argument(
         "--analyze-url",
         dest="analyze_url",
-        help="Analyze a URL for scam indicators (provide url)",
+        help="Analyze URL for phishing (provide url)",
     )
     parser.add_argument(
         "--generate-template",
@@ -54,306 +43,230 @@ def setup_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def validate_file_path(path: str) -> bool:
-    """Return True if the file exists on disk."""
-    return Path(path).is_file()
+def _list_test_emails() -> list:
+    """List all email files in test_data folder."""
+    test_data_dir = Path("test_data")
+    if not test_data_dir.exists():
+        return []
+    email_files = sorted([f for f in test_data_dir.glob("*.txt")])
+    return email_files
 
 
-def validate_url(url: str) -> bool:
-    """Return True when the input looks like a usable URL."""
-    if not url or not isinstance(url, str):
-        return False
-    stripped = url.strip()
-    return stripped.startswith("http://") or stripped.startswith("https://") or "." in stripped
+def _save_report(report_text: str, filename_prefix: str) -> str:
+    """Save report to reports folder with timestamp. Returns the saved file path."""
+    reports_dir = Path("reports")
+    reports_dir.mkdir(exist_ok=True)
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    report_filename = f"{filename_prefix}_{timestamp}.txt"
+    report_path = reports_dir / report_filename
+    report_path.write_text(report_text, encoding="utf-8")
+    return str(report_path)
 
 
-def _read_choice(prompt_text: str, valid_choices: set[str]) -> str:
-    """Read a menu choice from the user until it matches a valid value."""
-    while True:
-        choice = input(prompt_text).strip()
-        if choice in valid_choices:
-            return choice
-        ui.print_warning("Enter one of the listed numbers.")
+def _list_saved_reports() -> list:
+    """List all saved reports in reports folder."""
+    reports_dir = Path("reports")
+    if not reports_dir.exists():
+        return []
+    report_files = sorted(reports_dir.glob("*.txt"), reverse=True)
+    return report_files
 
 
-def _read_backable_choice(prompt_text: str, max_choice: int) -> int | None:
-    """Read a numeric choice or return None when the user goes back."""
-    while True:
-        choice = input(prompt_text).strip()
-        if choice.lower() in {"b", "back", "q", "quit"}:
-            return None
-        if choice.isdigit():
-            selection = int(choice)
-            if 1 <= selection <= max_choice:
-                return selection
-        ui.print_warning("Enter a valid number or 'b' to go back.")
-
-
-def _load_text_file(file_path: Path) -> str:
-    """Load a UTF-8 text file from disk."""
-    return file_path.read_text(encoding="utf-8", errors="replace")
-
-
-def _load_eml_file(file_path: Path) -> str:
-    """Load an EML file as bytes and decode to text for parsing."""
-    return file_path.read_bytes().decode("utf-8", errors="replace")
-
-
-def _read_raw_email_from_stdin() -> str:
-    """Read a pasted raw email source from stdin until a sentinel line."""
-    ui.print_header("Paste Raw Email Source")
-    ui.print_colored(
-        "Paste the full email source from your mail client.", "WHITE")
-    ui.print_colored(
-        "End input with a line containing only END.", "WHITE")
-    lines = []
-    while True:
-        line = input()
-        if line.strip() == "END":
-            break
-        lines.append(line)
-    return "\n".join(lines).strip()
-
-
-def _show_report_and_save(report_text: str, report_name: str) -> None:
-    """Print a report and persist it in the reports folder."""
-    saved_path = report.save_report(report_text, report_name)
-    print(report_text)
-    ui.print_success(f"Report saved to {saved_path}")
-
-
-def handle_email_file_menu() -> None:
-    """List test email files, let the user pick one, and analyze it."""
-    if not TEST_DATA_DIR.exists():
-        ui.print_warning("test_data folder is missing.")
+def _analyze_email_submenu() -> None:
+    """Submenu for analyzing email files from test_data."""
+    email_files = _list_test_emails()
+    if not email_files:
+        ui.print_error("No email files found in test_data/")
         return
+    ui.print_header("Available Email Files")
+    for idx, file_path in enumerate(email_files, 1):
+        print(f"{idx}. {file_path.name}")
+    try:
+        choice = input("Select file number (or 0 to cancel): ").strip()
+        if choice == "0":
+            return
+        file_idx = int(choice) - 1
+        if file_idx < 0 or file_idx >= len(email_files):
+            ui.print_error("Invalid selection")
+            return
+        selected_file = email_files[file_idx]
+        content = selected_file.read_text(encoding="utf-8")
+        result = analysis.analyze_email(content)
+        formatted = report.format_report(result, selected_file.name)
+        print(formatted)
+        saved_path = _save_report(formatted, f"email_{selected_file.stem}")
+        ui.print_success(f"Report saved to: {saved_path}")
+    except ValueError:
+        ui.print_error("Invalid input. Please enter a number.")
+    except Exception as e:
+        ui.print_error(f"Error analyzing email: {e}")
 
-    test_files = sorted(
-        [path for path in TEST_DATA_DIR.iterdir() if path.is_file()
-         and path.suffix.lower() == ".txt"],
-        key=lambda path: path.name.lower(),
-    )
-    if not test_files:
-        ui.print_warning("No email files found in test_data.")
+
+def _analyze_url_submenu() -> None:
+    """Submenu for analyzing URLs for phishing."""
+    ui.print_header("URL Phishing Analysis")
+    url = input("Enter URL to analyze (or 0 to cancel): ").strip()
+    if url == "0":
         return
-
-    while True:
-        ui.print_header("Analyze Email File")
-        for index, file_path in enumerate(test_files, start=1):
-            ui.print_colored(f"{index}. {file_path.name}", "BLUE")
-        ui.print_colored("B. Back", "WHITE")
-
-        selection = _read_backable_choice("Select file: ", len(test_files))
-        if selection is None:
-            return
-
-        selected_file = test_files[selection - 1]
-        content = _load_text_file(selected_file)
-        analysis_result = analysis.analyze_email(content)
-        report_text = report.format_report(
-            analysis_result, str(selected_file.name))
-        _show_report_and_save(report_text, f"email_{selected_file.stem}")
+    if not validate_url(url):
+        ui.print_error("Invalid URL format")
         return
+    
+    ui.print_info(f"Analyzing URL: {url}")
+    
+    # Perform security analysis
+    result = url_security.analyze_url_security(url)
+    
+    # Format comprehensive report
+    url_report = f"""URL PHISHING ANALYSIS REPORT
+========================
+URL Analyzed: {result['url']}
+Domain: {result['domain']}
+Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+
+SECURITY CHECK RESULTS:
+------------------------
+
+DNS Resolution:
+  Status: {'✓ Resolved' if result['dns_resolved'] else '✗ Failed to resolve'}
+  Error: {result['dns_error'] if result['dns_error'] else 'None'}
+  Resolved IPs: {', '.join(result['resolved_ips']) if result['resolved_ips'] else 'N/A'}
+
+Domain Verification:
+  Status: {'✓ Verified Legitimate' if result['is_verified'] else '✗ Not Verified'}
+  Details: {result['verification_status']}
+
+Character Analysis:
+  Suspicious Patterns: {'Yes' if result['special_chars_risk'] else 'No'}
+  Details: {chr(10).join(['  - ' + risk for risk in result['char_risks']]) if result['char_risks'] else '  None detected'}
+
+RISK ASSESSMENT:
+------------------------
+Risk Level: {result['risk_level']}
+
+Detected Indicators:
+{chr(10).join(['  - ' + indicator for indicator in result['risk_indicators']]) if result['risk_indicators'] else '  None detected'}
+
+RECOMMENDATIONS:
+------------------------
+{chr(10).join(['  - ' + rec for rec in result['recommendations']])}
+
+COPY-PASTE READY:
+------------------------
+Real Domain: {result['domain']}
+Real IP(s): {', '.join(result['resolved_ips']) if result['resolved_ips'] else 'Unable to resolve'}
+Visit: https://{result['domain']}
+"""
+    print(url_report)
+    saved_path = _save_report(url_report, f"url_{result['domain'].replace('.', '_')}")
+    ui.print_success(f"Report saved to: {saved_path}")
 
 
-def handle_mail_client_email_menu() -> None:
-    """Analyze user-provided emails exported from common mail clients."""
-    while True:
-        ui.print_header("Analyze Your Own Email")
-        ui.print_colored("1. Analyze exported .eml file", "BLUE")
-        ui.print_colored("2. Paste raw email source", "BLUE")
-        ui.print_colored("B. Back", "WHITE")
-
-        choice = input("Select option: ").strip().lower()
-        if choice in {"b", "back", "q", "quit"}:
-            return
-
-        if choice == "1":
-            eml_path = input("Path to .eml file: ").strip()
-            if eml_path.lower() in {"b", "back", "q", "quit"}:
-                continue
-            if not validate_file_path(eml_path):
-                ui.print_warning(f"File not found: {eml_path}")
-                continue
-
-            selected_file = Path(eml_path)
-            content = _load_eml_file(selected_file)
-            analysis_result = analysis.analyze_email(content)
-            report_text = report.format_report(
-                analysis_result, str(selected_file))
-            _show_report_and_save(
-                report_text, f"mail_client_{selected_file.stem}")
-            return
-
-        if choice == "2":
-            raw_content = _read_raw_email_from_stdin()
-            if not raw_content:
-                ui.print_warning("No raw email content detected.")
-                continue
-            analysis_result = analysis.analyze_email(raw_content)
-            report_text = report.format_report(
-                analysis_result, "Raw pasted email source")
-            _show_report_and_save(report_text, "mail_client_pasted_email")
-            return
-
-        ui.print_warning("Select a valid option.")
-
-
-def handle_url_menu() -> None:
-    """Prompt for a URL, analyze it, and save the report."""
-    while True:
-        ui.print_header("Analyze URL")
-        ui.print_colored(
-            "Enter a URL to inspect or type 'b' to go back.", "WHITE")
-        url = input("URL: ").strip()
-        if url.lower() in {"b", "back", "q", "quit"}:
-            return
-        if not validate_url(url):
-            ui.print_warning("Enter a valid URL.")
-            continue
-
-        analysis_result = analysis.analyze_url(url)
-        report_text = report.format_url_report(analysis_result, url)
-        _show_report_and_save(report_text, "url_analysis")
+def _view_reports_submenu() -> None:
+    """Submenu for viewing saved reports."""
+    reports = _list_saved_reports()
+    if not reports:
+        ui.print_info("No saved reports found.")
         return
-
-
-def handle_template_menu() -> None:
-    """Offer template generation options."""
-    template_options = {
-        "1": "spoofing",
-        "2": "typosquatting",
-        "3": "urgency",
-        "4": "social_engineering",
-    }
-    while True:
-        ui.print_header("Generate Template")
-        ui.print_colored("1. spoofing", "BLUE")
-        ui.print_colored("2. typosquatting", "BLUE")
-        ui.print_colored("3. urgency", "BLUE")
-        ui.print_colored("4. social_engineering", "BLUE")
-        ui.print_colored("B. Back", "WHITE")
-
-        choice = input("Select template: ").strip().lower()
-        if choice in {"b", "back", "q", "quit"}:
+    ui.print_header("Saved Reports")
+    for idx, report_file in enumerate(reports, 1):
+        file_size = report_file.stat().st_size
+        print(f"{idx}. {report_file.name} ({file_size} bytes)")
+    try:
+        choice = input("Select report number to view (or 0 to cancel): ").strip()
+        if choice == "0":
             return
-        tactic = template_options.get(choice)
-        if not tactic:
-            ui.print_warning("Select a valid template number.")
-            continue
-        print(templates.generate_template(tactic))
-        return
-
-
-def handle_recent_reports_menu() -> None:
-    """List recent saved reports and let the user view one."""
-    while True:
-        recent_reports = report.list_recent_reports()
-        ui.print_header("Recent Reports")
-        if not recent_reports:
-            ui.print_warning("No reports have been saved yet.")
+        report_idx = int(choice) - 1
+        if report_idx < 0 or report_idx >= len(reports):
+            ui.print_error("Invalid selection")
             return
+        selected_report = reports[report_idx]
+        content = selected_report.read_text(encoding="utf-8")
+        print(content)
+    except ValueError:
+        ui.print_error("Invalid input. Please enter a number.")
+    except Exception as e:
+        ui.print_error(f"Error reading report: {e}")
 
-        for index, report_path in enumerate(recent_reports, start=1):
-            ui.print_colored(f"{index}. {report_path.name}", "BLUE")
-        ui.print_colored("B. Back", "WHITE")
 
-        selection = _read_backable_choice(
-            "Select report: ", len(recent_reports))
-        if selection is None:
+def _generate_template_submenu() -> None:
+    """Submenu for generating educational phishing templates."""
+    tactics = ["spoofing", "typosquatting", "urgency", "social_engineering"]
+    ui.print_header("Available Templates")
+    for idx, tactic in enumerate(tactics, 1):
+        print(f"{idx}. {tactic}")
+    try:
+        choice = input("Select template number (or 0 to cancel): ").strip()
+        if choice == "0":
             return
-
-        selected_report = recent_reports[selection - 1]
-        ui.print_separator()
-        print(report.read_report(selected_report))
-        ui.print_separator()
-        return
+        tactic_idx = int(choice) - 1
+        if tactic_idx < 0 or tactic_idx >= len(tactics):
+            ui.print_error("Invalid selection")
+            return
+        selected_tactic = tactics[tactic_idx]
+        template_output = templates.generate_template(selected_tactic)
+        print(template_output)
+    except ValueError:
+        ui.print_error("Invalid input. Please enter a number.")
+    except Exception as e:
+        ui.print_error(f"Error generating template: {e}")
 
 
 def handle_interactive_menu() -> None:
-    """Show the main menu and route each option to its submenu."""
+    """Show the interactive menu and execute user choices."""
     while True:
         print(ui.create_interactive_menu())
-        choice = _read_choice("Choice: ", {"1", "2", "3", "4", "5", "6"})
-        if choice == "1":
-            handle_email_file_menu()
+        choice = input("Choice: ").strip()
+        if choice == "6":
+            print("Exiting...")
+            return
+        elif choice == "1":
+            _analyze_email_submenu()
         elif choice == "2":
-            handle_mail_client_email_menu()
+            ui.print_info("Mail client integration coming soon")
         elif choice == "3":
-            handle_url_menu()
+            _analyze_url_submenu()
         elif choice == "4":
-            handle_template_menu()
+            _generate_template_submenu()
         elif choice == "5":
-            handle_recent_reports_menu()
-        elif choice == "6":
-            ui.print_info("Exiting...")
-            return
+            _view_reports_submenu()
+        else:
+            ui.print_warning("Invalid choice. Please try again.")
+        print()
 
 
-def run_from_args(args: argparse.Namespace) -> None:
-    """Run the non-interactive command selected by parsed arguments."""
-    if args.analyze_eml:
-        if not validate_file_path(args.analyze_eml):
-            ui.print_error(f"File not found: {args.analyze_eml}")
-            return
-        selected_file = Path(args.analyze_eml)
-        content = _load_eml_file(selected_file)
-        analysis_result = analysis.analyze_email(content)
-        report_text = report.format_report(analysis_result, str(selected_file))
-        _show_report_and_save(report_text, f"mail_client_{selected_file.stem}")
-        return
+def validate_file_path(path: str) -> bool:
+    """Return True if the file exists on disk."""
+    return os.path.isfile(path)
 
-    if args.analyze_raw:
-        raw_content = _read_raw_email_from_stdin()
-        if not raw_content:
-            ui.print_error("No raw email content detected.")
-            return
-        analysis_result = analysis.analyze_email(raw_content)
-        report_text = report.format_report(
-            analysis_result, "Raw pasted email source")
-        _show_report_and_save(report_text, "mail_client_pasted_email")
-        return
 
-    if args.analyze:
-        if not validate_file_path(args.analyze):
-            ui.print_error(f"File not found: {args.analyze}")
-            return
-        selected_file = Path(args.analyze)
-        content = _load_text_file(selected_file)
-        analysis_result = analysis.analyze_email(content)
-        report_text = report.format_report(analysis_result, str(selected_file))
-        _show_report_and_save(report_text, f"email_{selected_file.stem}")
-        return
-
-    if args.analyze_url:
-        if not validate_url(args.analyze_url):
-            ui.print_error(f"Invalid URL: {args.analyze_url}")
-            return
-        analysis_result = analysis.analyze_url(args.analyze_url)
-        report_text = report.format_url_report(
-            analysis_result, args.analyze_url)
-        _show_report_and_save(report_text, "url_analysis")
-        return
-
-    if args.generate_template:
-        print(templates.generate_template(args.generate_template))
-        return
-
-    if args.interactive:
-        handle_interactive_menu()
+def validate_url(url: str) -> bool:
+    """Basic URL validation: returns True if starts with http/https or looks like domain."""
+    if not url or not isinstance(url, str):
+        return False
+    url = url.strip()
+    return url.startswith("http://") or url.startswith("https://") or "." in url
 
 
 if __name__ == "__main__":
     parser = setup_parser()
-    parsed_args = parser.parse_args()
-    if any([
-        parsed_args.analyze,
-        parsed_args.analyze_eml,
-        parsed_args.analyze_raw,
-        parsed_args.analyze_url,
-        parsed_args.generate_template,
-        parsed_args.interactive,
-    ]):
-        run_from_args(parsed_args)
+    args = parser.parse_args()
+    if args.analyze:
+        if not validate_file_path(args.analyze):
+            print(f"Error: File not found: {args.analyze}")
+        else:
+            try:
+                content = open(args.analyze, encoding="utf-8").read()
+                result = analysis.analyze_email(content)
+                formatted = report.format_report(result, args.analyze)
+                print(formatted)
+            except Exception as e:
+                print(f"Error: {e}")
+    elif args.analyze_url:
+        print(f"URL analysis coming soon: {args.analyze_url}")
+    elif args.generate_template:
+        print(templates.generate_template(args.generate_template))
+    elif args.interactive:
+        handle_interactive_menu()
     else:
         parser.print_help()

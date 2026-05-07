@@ -1,25 +1,65 @@
+import shutil
+
 from colorama import Fore, Style, init
 
 init(autoreset=True)
 
 
 def create_banner() -> str:
-    """Return an ASCII art banner with a fish-on-hook theme.
+    """Return the banner logo with a red-to-yellow per-line gradient.
 
     Returns:
-        str: Multi-line banner string using color placeholders.
+        str: Multi-line banner string with top spacing and left-shifted layout.
     """
-    banner_lines = [
-        Fore.CYAN + Style.BRIGHT + "      .-''''-.",
-        Fore.CYAN + "     (  .--.  )",
-        Fore.CYAN + "    (  (    )  )    " + Fore.YELLOW + "~ ~ ~",
-        Fore.CYAN + "   |  |  ()  |  |   " + Fore.RED + "<==\"",
-        Fore.CYAN + "    (  (    )  )",
-        Fore.CYAN + "     '._'--'_.'",
+    logo_lines = [
+        "                                                       /",
+        "             _    _  _______  _______  ______         (             _______  _______ ",
+        "            | |  / )(_______)(_______)(_____ \\       | |      /\\   (_______)(_______)",
+        "            | | / /  _____    _____    _____) )       \\ \\    /  \\   _____    _____   ",
+        "            | |< <  |  ___)  |  ___)  |  ____/     /|  \\ \\  / /\\ \\ |  ___)  |  ___)  ",
+        "            | | \\ \\ | |_____ | |_____ | |         ( |__/  )| |__| || |      | |_____ ",
+        "            |_|  \\_)|_______)|_______)|_|         (______/ |______||_|      |_______)",
         "",
-        Fore.CYAN + Style.BRIGHT + "       PHISHING ANALYSIS TOOL",
+        "",
+        "                                         ----=-**                #*###     ",
+        "                                      ::------==+*           -+-=**#       ",
+        "                               --*+-:#++:-:=::-:--+=       -=---+*% @      ",
+        "                            ::==+-+++=*+++=-===-+:--==   =-=---===+*       ",
+        "                           =-.:=++*=*++=**%#*=*=++*-=-----:=:-::::-+*#        ",
+        "                      ::.:+-##-=**%%#*=**%#+*+++*#*++#*+*---=-===*         ",
+        "                      :-=#=-%+-=*#*+==#%*#++***+++*#***+=*-----#%          ",
+        "                       ====-===*=++=*#*+=++**+**+=+#*++*-:----=*+*##       ",
+        "                          ++-=:=#+**+#*=*#%*++++#**+=     --------+#       ",
+        "                            +++:::-++**+=+=+*+++=*---==#      -=+--=**#    ",
+        "                               ++--:=+---=++--      =--==* **     ++*%#    ",
+        "                               -      :::---+                              ",
+        "                               ==       --=--=                             ",
+        "                                *        =+%                               ",
+        "                                           # %                             ",
     ]
-    return "\n".join(banner_lines)
+    terminal_width = shutil.get_terminal_size((120, 24)).columns
+    content_width = max(len(line) for line in logo_lines)
+    centered_padding = max((terminal_width - content_width) // 2, 0)
+    left_padding = max(centered_padding - 24, 0)
+
+    def rgb_foreground(red: int, green: int, blue: int) -> str:
+        """Build a 24-bit ANSI foreground color escape sequence."""
+        return f"\033[38;2;{red};{green};{blue}m"
+
+    colored_lines = []
+    for index, line in enumerate(logo_lines):
+        if not line.strip():
+            colored_lines.append("")
+            continue
+        shade_position = index / max(len(logo_lines) - 1, 1)
+        green_value = int(255 * shade_position)
+        colored_lines.append(
+            " " * left_padding
+            + Style.BRIGHT
+            + rgb_foreground(255, green_value, 0)
+            + line
+        )
+    return "\n\n" + "\n".join(colored_lines)
 
 
 def print_colored(text: str, color: str, bold: bool = False) -> None:
@@ -56,6 +96,7 @@ def print_error(message: str) -> None:
 
 def print_info(message: str) -> None:
     """Print an informational message in cyan."""
+    print()
     print_colored(message, "CYAN", bold=False)
 
 
@@ -96,7 +137,7 @@ def create_interactive_menu() -> str:
     Returns:
         str: Formatted menu ready to print.
     """
-    header = Style.BRIGHT + Fore.CYAN + "=== PHISHING ANALYSIS TOOL ==="
+    header = Style.BRIGHT + Fore.CYAN + "\n=== PHISHING ANALYSIS TOOL ===\n"
     options = (
         Fore.BLUE + "1. " + Fore.WHITE + "Analyze email file\n"
         + Fore.BLUE + "2. " + Fore.WHITE +

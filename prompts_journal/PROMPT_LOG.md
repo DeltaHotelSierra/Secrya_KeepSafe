@@ -31,4 +31,32 @@ daniel santos
 we need to imprement a way to allow the user the test there own emails from there own mail clients
 
 
-    
+# 3rd Prompt
+
+daniel santos
+
+update the ui logo to these lines strcitly,  make a gradeint of red to yellow across the logo and make sure its centered with in the teminal
+
+# 4th Prompt
+
+daniel santos 
+
+not a good enough gradient each line needs to be a diffrent shade, also the logo need to be push left by a few tabs also leave a spcae at the top by two line
+
+
+# 5th Prompt
+
+Daniel Santos 
+
+we need to implement a way to check URL secuirty in a reliable way can we Accept a domain name (for example, google.com)
+Perform a DNS lookup
+Show whether the domain can be resolved
+Optionally display the resolved IP address. if they dont match the real companies dns then we can call it a scam also if theres any special charecters also flag it as a risk the should also show the real ip and real website url ready to copy and paste 
+
+
+# 6th Prompt
+
+
+Daniel Santos 
+
+We should use colour to mark risk level with each report when the create the report file for each rerport the risk level line should be highlighted in a colour depending on the integer so anything below or equal to 2 should be red, then 3-4 should be orange, 5- 6 should be yellow 7-8 chiuld be blue 9-10 should be green 
