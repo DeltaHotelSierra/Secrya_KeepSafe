@@ -2,7 +2,7 @@
 import sys
 
 try:
-    from . import ui, cli, analysis, templates, report, prompt_logger
+    from . import ui, cli, analysis, templates, report, prompt_logger, url_security
 except ImportError:  # pragma: no cover - support running as a script
     import ui
     import cli
@@ -10,6 +10,7 @@ except ImportError:  # pragma: no cover - support running as a script
     import templates
     import report
     import prompt_logger
+    import url_security
 
 
 def main() -> None:
@@ -30,7 +31,13 @@ def main() -> None:
             formatted = report.format_report(result, args.analyze)
             print(formatted)
         elif args.analyze_url:
-            ui.print_info(f"URL analysis coming soon: {args.analyze_url}")
+            url_result = url_security.analyze_url_security(args.analyze_url)
+            formatted = url_security.generate_url_security_report(
+                url_result, args.analyze_url)
+            print(formatted)
+            saved_path = report.save_report(
+                formatted, f"url_{url_result['domain'].replace('.', '_')}")
+            ui.print_success(f"Report saved to: {saved_path}")
         elif args.generate_template:
             out = templates.generate_template(args.generate_template)
             print(out)

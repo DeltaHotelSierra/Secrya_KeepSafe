@@ -1,0 +1,39 @@
+URL PHISHING ANALYSIS REPORT
+========================
+URL Analyzed: https://github.com
+Domain: github.com
+Date: 2026-05-07 19:19:09
+
+SECURITY CHECK RESULTS:
+------------------------
+
+DNS Resolution:
+  Status: ✓ Resolved
+  Error: None
+  Resolved IPs: 140.82.121.3
+
+Domain Verification:
+  Status: ✗ Not Verified
+  Details: ⚠ Domain exists but IP mismatch. Expected: ['140.82.113.3', '140.82.113.4'], Got: ['140.82.121.3']
+
+Character Analysis:
+  Suspicious Patterns: No
+  Details:   None detected
+
+RISK ASSESSMENT:
+------------------------
+Risk Level: MEDIUM
+
+Detected Indicators:
+  - Domain resolves but IP not verified against known legitimate IPs
+
+RECOMMENDATIONS:
+------------------------
+  - Domain resolves but not in known legitimate domains database
+  - Verify through official company channels before clicking
+
+COPY-PASTE READY:
+------------------------
+Real Domain: github.com
+Real IP(s): 140.82.121.3
+Visit: https://github.com

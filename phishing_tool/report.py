@@ -7,6 +7,13 @@ import re
 
 REPORTS_DIR = Path(__file__).resolve().parent / "reports"
 
+RESET_COLOR = "\033[0m"
+RED_COLOR = "\033[31m"
+ORANGE_COLOR = "\033[38;2;255;165;0m"
+YELLOW_COLOR = "\033[33m"
+BLUE_COLOR = "\033[34m"
+GREEN_COLOR = "\033[32m"
+
 
 def _ensure_analysis_result(analysis_result: dict) -> bool:
     """Return True when the analysis payload looks like a report result."""
@@ -34,13 +41,39 @@ def _recommendations_for_level(risk_level: str) -> list:
     return ["- Unable to determine recommendations"]
 
 
+def _risk_color_for_score(risk_score) -> str:
+    """Return an ANSI color code for the given risk score."""
+    try:
+        score = float(risk_score)
+    except (TypeError, ValueError):
+        return ""
+
+    if score <= 2:
+        return RED_COLOR
+    if score <= 4:
+        return ORANGE_COLOR
+    if score <= 6:
+        return YELLOW_COLOR
+    if score <= 8:
+        return BLUE_COLOR
+    return GREEN_COLOR
+
+
+def format_risk_line(risk_level: str, risk_score) -> str:
+    """Format the risk line with color based on the numeric score."""
+    color = _risk_color_for_score(risk_score)
+    score_text = "?" if risk_score is None else risk_score
+    line = f"Risk Level: {risk_level} ({score_text}/10)"
+    return f"{color}{line}{RESET_COLOR}" if color else line
+
+
 def _build_report_lines(title: str, analysis_result: dict, source_label: str = None) -> list:
     """Build the shared report body for email and URL analysis."""
     lines = [title, "=" * len(title)]
     if source_label:
         lines.append(source_label)
-    lines.append(
-        f"Risk Level: {analysis_result.get('risk_level')} ({analysis_result.get('risk_score')}/10)")
+    lines.append(format_risk_line(analysis_result.get(
+        'risk_level'), analysis_result.get('risk_score')))
     lines.append("")
     lines.append("DETECTED INDICATORS:")
     if analysis_result.get("indicators"):

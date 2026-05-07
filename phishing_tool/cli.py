@@ -111,54 +111,17 @@ def _analyze_url_submenu() -> None:
     if not validate_url(url):
         ui.print_error("Invalid URL format")
         return
-    
+
     ui.print_info(f"Analyzing URL: {url}")
-    
+
     # Perform security analysis
     result = url_security.analyze_url_security(url)
-    
+
     # Format comprehensive report
-    url_report = f"""URL PHISHING ANALYSIS REPORT
-========================
-URL Analyzed: {result['url']}
-Domain: {result['domain']}
-Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
-
-SECURITY CHECK RESULTS:
-------------------------
-
-DNS Resolution:
-  Status: {'✓ Resolved' if result['dns_resolved'] else '✗ Failed to resolve'}
-  Error: {result['dns_error'] if result['dns_error'] else 'None'}
-  Resolved IPs: {', '.join(result['resolved_ips']) if result['resolved_ips'] else 'N/A'}
-
-Domain Verification:
-  Status: {'✓ Verified Legitimate' if result['is_verified'] else '✗ Not Verified'}
-  Details: {result['verification_status']}
-
-Character Analysis:
-  Suspicious Patterns: {'Yes' if result['special_chars_risk'] else 'No'}
-  Details: {chr(10).join(['  - ' + risk for risk in result['char_risks']]) if result['char_risks'] else '  None detected'}
-
-RISK ASSESSMENT:
-------------------------
-Risk Level: {result['risk_level']}
-
-Detected Indicators:
-{chr(10).join(['  - ' + indicator for indicator in result['risk_indicators']]) if result['risk_indicators'] else '  None detected'}
-
-RECOMMENDATIONS:
-------------------------
-{chr(10).join(['  - ' + rec for rec in result['recommendations']])}
-
-COPY-PASTE READY:
-------------------------
-Real Domain: {result['domain']}
-Real IP(s): {', '.join(result['resolved_ips']) if result['resolved_ips'] else 'Unable to resolve'}
-Visit: https://{result['domain']}
-"""
+    url_report = url_security.generate_url_security_report(result, url)
     print(url_report)
-    saved_path = _save_report(url_report, f"url_{result['domain'].replace('.', '_')}")
+    saved_path = _save_report(
+        url_report, f"url_{result['domain'].replace('.', '_')}")
     ui.print_success(f"Report saved to: {saved_path}")
 
 
@@ -173,7 +136,8 @@ def _view_reports_submenu() -> None:
         file_size = report_file.stat().st_size
         print(f"{idx}. {report_file.name} ({file_size} bytes)")
     try:
-        choice = input("Select report number to view (or 0 to cancel): ").strip()
+        choice = input(
+            "Select report number to view (or 0 to cancel): ").strip()
         if choice == "0":
             return
         report_idx = int(choice) - 1
