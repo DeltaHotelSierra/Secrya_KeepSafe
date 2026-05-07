@@ -1,0 +1,39 @@
+URL PHISHING ANALYSIS REPORT
+========================
+URL Analyzed: this-domain-definitely-does-not-exist-12345.com
+Domain: this-domain-definitely-does-not-exist-12345.com
+Date: 2026-05-07 19:58:29
+
+SECURITY CHECK RESULTS:
+------------------------
+
+DNS Resolution:
+  Status: ✗ Failed to resolve
+  Error: DNS resolution failed: [Errno -2] Name or service not known
+  Resolved IPs: N/A
+
+Domain Verification:
+  Status: ✗ Not Verified
+  Details: 
+
+Character Analysis:
+  Suspicious Patterns: No
+  Details:   None detected
+
+RISK ASSESSMENT:
+------------------------
+[31mRisk Level: HIGH (10/10)[0m
+
+Detected Indicators:
+  - DNS resolution failed: DNS resolution failed: [Errno -2] Name or service not known
+
+RECOMMENDATIONS:
+------------------------
+  - Domain cannot be resolved - likely fake or typo
+  - Do not visit this URL
+
+COPY-PASTE READY:
+------------------------
+Real Domain: this-domain-definitely-does-not-exist-12345.com
+Real IP(s): Unable to resolve
+Visit: https://this-domain-definitely-does-not-exist-12345.com

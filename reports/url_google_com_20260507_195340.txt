@@ -1,0 +1,39 @@
+URL PHISHING ANALYSIS REPORT
+========================
+URL Analyzed: google.com
+Domain: google.com
+Date: 2026-05-07 19:53:40
+
+SECURITY CHECK RESULTS:
+------------------------
+
+DNS Resolution:
+  Status: ✓ Resolved
+  Error: None
+  Resolved IPs: 216.58.198.46
+
+Domain Verification:
+  Status: ✓ Verified Legitimate
+  Details: ✓ Verified: Domain resolves to known legitimate IP(s): 216.58.198.46
+
+Character Analysis:
+  Suspicious Patterns: No
+  Details:   None detected
+
+RISK ASSESSMENT:
+------------------------
+[31mRisk Level: LOW (1/10)[0m
+
+Detected Indicators:
+  None detected
+
+RECOMMENDATIONS:
+------------------------
+  - Domain appears legitimate
+  - Still exercise caution with personal information
+
+COPY-PASTE READY:
+------------------------
+Real Domain: google.com
+Real IP(s): 216.58.198.46
+Visit: https://google.com

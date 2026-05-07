@@ -8,11 +8,11 @@ import re
 REPORTS_DIR = Path(__file__).resolve().parent / "reports"
 
 RESET_COLOR = "\033[0m"
-RED_COLOR = "\033[31m"
+RED_COLOR = "\033[38;2;255;0;0m"
 ORANGE_COLOR = "\033[38;2;255;165;0m"
-YELLOW_COLOR = "\033[33m"
-BLUE_COLOR = "\033[34m"
-GREEN_COLOR = "\033[32m"
+YELLOW_COLOR = "\033[38;2;255;255;0m"
+BLUE_COLOR = "\033[38;2;0;102;255m"
+GREEN_COLOR = "\033[38;2;0;200;0m"
 
 
 def _ensure_analysis_result(analysis_result: dict) -> bool:
@@ -49,14 +49,16 @@ def _risk_color_for_score(risk_score) -> str:
         return ""
 
     if score <= 2:
-        return RED_COLOR
+        return GREEN_COLOR
     if score <= 4:
-        return ORANGE_COLOR
+        return BLUE_COLOR
     if score <= 6:
         return YELLOW_COLOR
     if score <= 8:
-        return BLUE_COLOR
-    return GREEN_COLOR
+        return ORANGE_COLOR
+    if score <= 10:
+        return RED_COLOR
+    return RED_COLOR
 
 
 def format_risk_line(risk_level: str, risk_score) -> str:
@@ -67,34 +69,36 @@ def format_risk_line(risk_level: str, risk_score) -> str:
     return f"{color}{line}{RESET_COLOR}" if color else line
 
 
-def _build_report_lines(title: str, analysis_result: dict, source_label: str = None) -> list:
+def _build_report_lines(title: str, analysis_result: dict, source_label: str | None = None) -> list:
     """Build the shared report body for email and URL analysis."""
+    risk_level = str(analysis_result.get("risk_level") or "UNKNOWN")
+    risk_score = analysis_result.get("risk_score")
+    indicators = analysis_result.get("indicators") or []
+    explanations = analysis_result.get("explanations") or []
+
     lines = [title, "=" * len(title)]
     if source_label:
         lines.append(source_label)
-    lines.append(format_risk_line(analysis_result.get(
-        'risk_level'), analysis_result.get('risk_score')))
+    lines.append(format_risk_line(risk_level, risk_score))
     lines.append("")
     lines.append("DETECTED INDICATORS:")
-    if analysis_result.get("indicators"):
-        lines.extend(
-            f"- {indicator}" for indicator in analysis_result.get("indicators"))
+    if indicators:
+        lines.extend(f"- {indicator}" for indicator in indicators)
     else:
         lines.append("- None detected")
     lines.append("")
     lines.append("WHY THIS MATTERS:")
-    if analysis_result.get("explanations"):
-        lines.extend(
-            f"- {explanation}" for explanation in analysis_result.get("explanations"))
+    if explanations:
+        lines.extend(f"- {explanation}" for explanation in explanations)
     else:
         lines.append("- No specific explanations")
     lines.append("")
     lines.append("RECOMMENDATIONS:")
-    lines.extend(_recommendations_for_level(analysis_result.get("risk_level")))
+    lines.extend(_recommendations_for_level(risk_level))
     return lines
 
 
-def format_report(analysis_result: dict, email_file: str = None) -> str:
+def format_report(analysis_result: dict, email_file: str | None = None) -> str:
     """Format email analysis results into a printable report string."""
     if not _ensure_analysis_result(analysis_result):
         return "Error: Invalid analysis result format"
@@ -102,7 +106,7 @@ def format_report(analysis_result: dict, email_file: str = None) -> str:
     return "\n".join(_build_report_lines("PHISHING ANALYSIS REPORT", analysis_result, source_label))
 
 
-def format_url_report(analysis_result: dict, url: str = None) -> str:
+def format_url_report(analysis_result: dict, url: str | None = None) -> str:
     """Format URL analysis results into a printable report string."""
     if not _ensure_analysis_result(analysis_result):
         return "Error: Invalid analysis result format"
