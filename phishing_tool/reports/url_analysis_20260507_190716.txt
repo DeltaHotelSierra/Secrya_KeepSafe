@@ -1,9 +1,0 @@
-URL PHISHING ANALYSIS REPORT
-========================
-URL: https://example.com
-Date: 2026-05-07 19:07:16
-
-ANALYSIS:
-URL phishing detection coming soon.
-
-STATUS: Pending full implementation

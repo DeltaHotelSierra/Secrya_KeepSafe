@@ -5,7 +5,7 @@ from pathlib import Path
 import re
 
 
-REPORTS_DIR = Path(__file__).resolve().parent / "reports"
+REPORTS_DIR = Path(__file__).resolve().parent.parent / "reports"
 
 RESET_COLOR = "\033[0m"
 RED_COLOR = "\033[38;2;255;0;0m"

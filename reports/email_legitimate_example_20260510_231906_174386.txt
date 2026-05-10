@@ -1,7 +1,7 @@
 PHISHING ANALYSIS REPORT
 ========================
 File: legitimate_example.txt
-Risk Level: LOW (0.67/10)
+[38;2;0;200;0mRisk Level: LOW (0.67/10)[0m
 
 DETECTED INDICATORS:
 - None detected
