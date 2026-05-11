@@ -121,7 +121,7 @@ Where reports are saved
 
 - Generated reports are saved to the top-level `reports/` folder. Use `View recent reports` inside the interactive UI to open, delete, or delete-all.
 
-How to add to a customer's computer
+How to add to a customer's computer 
 
 - Ensure Python and pip are installed.
 - Copy the repository to the target machine (git clone or archive copy).
@@ -167,3 +167,6 @@ Support
 License
 
 - Include your preferred license here.
+
+
+test
