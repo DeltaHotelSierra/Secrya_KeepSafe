@@ -19,8 +19,20 @@ Quick start (Linux / macOS / Windows)
 
 Prerequisites
 
-- Python 3.11+ (3.12 recommended)
+- Python 3.9+ (3.11 or 3.12 recommended)
 - Git
+
+Verify your Python command first:
+
+```bash
+python3 --version
+```
+
+If `python3` is not available on macOS, use:
+
+```bash
+/usr/bin/python3 --version
+```
 
 Install
 
@@ -40,6 +52,13 @@ python3 -m venv .venv
 source .venv/bin/activate
 ```
 
+macOS fallback (when `python3` is not found):
+
+```bash
+/usr/bin/python3 -m venv .venv
+source .venv/bin/activate
+```
+
 Windows (PowerShell):
 
 ```powershell
@@ -50,7 +69,16 @@ python -m venv .venv
 3. Install Python dependencies:
 
 ```bash
-pip install -r requirements.txt
+python -m pip install -U pip
+python -m pip install -r requirements.txt
+```
+
+If you are not using a virtual environment:
+
+```bash
+python3 -m pip install -r requirements.txt
+# or on some macOS installs:
+/usr/bin/python3 -m pip install -r requirements.txt
 ```
 
 Run the tool
@@ -58,15 +86,35 @@ Run the tool
 - Interactive mode (recommended):
 
 ```bash
+python run.py --interactive
+# or
+python -m phishing_tool.main --interactive
+```
+
+If you are not in a virtual environment:
+
+```bash
 python3 run.py --interactive
 # or
-python3 -m phishing_tool.main --interactive
+/usr/bin/python3 run.py --interactive
 ```
 
 - Analyze a single URL from the CLI:
 
 ```bash
-python3 -m phishing_tool.main --analyze-url "http://example.com"
+python -m phishing_tool.main --analyze-url "http://example.com"
+```
+
+Troubleshooting (macOS)
+
+- `zsh: command not found: brew`:
+  Homebrew is optional. You can run this project without Homebrew using `python3` or `/usr/bin/python3`.
+- `xcode-select: Failed to locate 'python'`:
+  Use `python3` instead of `python`, or use the absolute path `/usr/bin/python3`.
+- Missing package errors such as `ModuleNotFoundError: No module named colorama`:
+
+```bash
+python -m pip install -r requirements.txt
 ```
 
 Where reports are saved
