@@ -168,5 +168,32 @@ License
 
 - Include your preferred license here.
 
-test
-test
+
+How to contribute 
+
+You create a LOCAL branch on your machine:
+
+bashgit checkout -b feature/whatever origin/main
+
+This exists only on your computer right now.
+
+You work and commit (all local)
+You push it to make it REMOTE:
+
+bashgit push origin feature/whatever
+Now it exists on GitHub too (origin/feature/whatever)
+
+GitHub sees it, you make a PR, teammates review
+After merge, you delete BOTH:
+
+bashgit branch -d feature/whatever          # Delete local
+git push origin --delete feature/whatever # Delete remote
+So the answer is: start local, push to make it remote.
+The remote copy is what teammates see and review. Without pushing, only you can see your work.
+Why I'm emphasizing this:
+Your current setup has DeltaSierra as a remote branch that's been around for months. You push to it, teammates don't review it, it just sits there. That's the problem.
+With feature branches, the flow is:
+
+Local → Remote (via push) → PR (review) → Main (merge) → Delete both
+
+Each branch has a purpose and then dies. Clean.
