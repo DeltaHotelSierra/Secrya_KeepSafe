@@ -169,31 +169,64 @@ License
 - Include your preferred license here.
 
 
-How to contribute 
+## Contributing & Git Workflow
 
-You create a LOCAL branch on your machine:
+### Branch Strategy
 
-bashgit checkout -b feature/whatever origin/main
+We use **feature branches** with pull requests. Each piece of work (feature, bugfix, docs) gets its own branch.
 
-This exists only on your computer right now.
+### Step-by-Step Workflow
 
-You work and commit (all local)
-You push it to make it REMOTE:
+1. **Start new work from main**
+```bash
+   git checkout -b feature/description-of-work origin/main
+```
+   Use descriptive names: `feature/user-auth`, `bugfix/login-crash`, `docs/setup-guide`
 
-bashgit push origin feature/whatever
-Now it exists on GitHub too (origin/feature/whatever)
+2. **Work and commit normally**
+```bash
+   git add .
+   git commit -m "Clear commit message describing change"
+```
 
-GitHub sees it, you make a PR, teammates review
-After merge, you delete BOTH:
+3. **Before pushing, sync with main** (in case teammates merged PRs)
+```bash
+   git pull origin main
+```
+   Resolve any conflicts if they exist.
 
-bashgit branch -d feature/whatever          # Delete local
-git push origin --delete feature/whatever # Delete remote
-So the answer is: start local, push to make it remote.
-The remote copy is what teammates see and review. Without pushing, only you can see your work.
-Why I'm emphasizing this:
-Your current setup has DeltaSierra as a remote branch that's been around for months. You push to it, teammates don't review it, it just sits there. That's the problem.
-With feature branches, the flow is:
+4. **Push your branch**
+```bash
+   git push origin feature/description-of-work
+```
 
-Local → Remote (via push) → PR (review) → Main (merge) → Delete both
+5. **Create a Pull Request on GitHub**
+   - Go to the repo, GitHub will suggest creating a PR
+   - Add a description of what changed and why
+   - Request a teammate to review
 
-Each branch has a purpose and then dies. Clean.
+6. **Code review**
+   - Address any feedback from reviewers
+   - Push fixes to the same branch (they auto-update the PR)
+
+7. **Merge**
+   - Once approved, merge the PR on GitHub
+   - Delete the remote branch from GitHub
+
+8. **Cleanup locally**
+```bash
+   git checkout main
+   git pull origin main
+   git branch -d feature/description-of-work
+```
+
+### Key Rules
+- **Never push directly to main.** Always use a PR.
+- **Keep branches focused.** One feature per branch.
+- **Sync frequently.** Run `git pull origin main` before pushing.
+- **Delete branches after merge.** Keep the repo clean.
+
+### If You Get Stuck
+- Check what branch you're on: `git branch -vv`
+- See uncommitted changes: `git status`
+- Review recent commits: `git log --oneline -5`
