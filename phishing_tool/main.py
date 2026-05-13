@@ -39,7 +39,10 @@ def main() -> None:
                 formatted, f"url_{url_result['domain'].replace('.', '_')}")
             ui.print_success(f"Report saved to: {saved_path}")
         elif args.generate_template:
-            out = templates.generate_template(args.generate_template)
+            # Support optional saving of templates to GENERATED_EMAILS/
+            save_flag = getattr(args, "save_template", False)
+            name = getattr(args, "template_name", None)
+            out = templates.generate_template(args.generate_template, save=save_flag, name=name)
             print(out)
         elif args.interactive:
             cli.handle_interactive_menu()

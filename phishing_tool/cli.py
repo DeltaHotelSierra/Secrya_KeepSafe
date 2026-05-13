@@ -39,6 +39,17 @@ def setup_parser() -> argparse.ArgumentParser:
         help="Generate educational template: spoofing/typosquatting/urgency/social_engineering",
     )
     parser.add_argument(
+        "--save-template",
+        action="store_true",
+        dest="save_template",
+        help="When used with --generate-template, save the generated template to GENERATED_EMAILS/",
+    )
+    parser.add_argument(
+        "--template-name",
+        dest="template_name",
+        help="Optional filename prefix when saving a generated template",
+    )
+    parser.add_argument(
         "--interactive",
         action="store_true",
         dest="interactive",
