@@ -96,3 +96,16 @@ version 1.3.1
 # 9th Prompt
 
 daniel santos
+
+
+# 10th Prompt
+
+Jonathan Bam
+
+Read the README and make it work on my machine and give me the command to run the program
+
+# 11th Prompt
+
+Jonathan Bam
+
+i want a simple config system so we don’t hardcode everything. create a config file (like config.json or .env) where we can set things like: default reports folder name, logs folder name, risk thresholds, and any api keys if we add them later. update the code so it reads from this config at startup and falls back to safe defaults if the file is missing or broken. document each config option in the readme so someone new can customize the tool without touching the code.
