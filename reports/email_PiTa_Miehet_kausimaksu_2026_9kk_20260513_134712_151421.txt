@@ -1,0 +1,14 @@
+PHISHING ANALYSIS REPORT
+========================
+File: PiTa Miehet_ kausimaksu 2026 (9kk).eml
+[38;2;0;200;0mRisk Level: LOW (2.0/10)[0m
+
+DETECTED INDICATORS:
+- Urgency language
+
+WHY THIS MATTERS:
+- Urgency keywords: now
+
+RECOMMENDATIONS:
+- Likely safe, but still verify unexpected requests
+- Use normal caution before opening links
