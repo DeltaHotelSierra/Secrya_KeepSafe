@@ -1,0 +1,16 @@
+PHISHING ANALYSIS REPORT
+========================
+File: phishing_example.txt
+[38;2;255;255;0mRisk Level: MEDIUM (6.0/10)[0m
+
+DETECTED INDICATORS:
+- Urgency language
+- Link mismatch
+
+WHY THIS MATTERS:
+- Urgency keywords: immediately, 24 hours, verify, revoked
+- Sender domain 'your-bank.com' does not match URL domain 'verify-bank-account-security.com'
+
+RECOMMENDATIONS:
+- Verify through an official channel before interacting
+- Check sender details and domain carefully

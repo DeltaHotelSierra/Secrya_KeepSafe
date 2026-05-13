@@ -5,7 +5,9 @@ Welcome! You now have a complete, production-ready starter package for integrati
 ## 📍 Quick Navigation
 
 ### For Project Managers / Non-Technical Users
+
 Start here: [BROWSER_EXTENSION_PROPOSAL.md](BROWSER_EXTENSION_PROPOSAL.md)
+
 - High-level overview
 - Architecture diagrams
 - Feature breakdown
@@ -13,25 +15,33 @@ Start here: [BROWSER_EXTENSION_PROPOSAL.md](BROWSER_EXTENSION_PROPOSAL.md)
 - Business value
 
 ### For Developers (Immediate Setup)
+
 Start here: [setup_extension.py](setup_extension.py)
+
 ```bash
 python setup_extension.py
 ```
+
 Then: [EXTENSION_SETUP_GUIDE.md](EXTENSION_SETUP_GUIDE.md)
 
 ### For Frontend Developers
+
 Start here: [extension-starter/README.md](extension-starter/README.md)
+
 - Extension documentation
 - UI customization
 - JavaScript code walkthrough
 
 ### For Backend Developers
+
 Start here: [backend-starter/README.md](backend-starter/README.md)
+
 - API documentation
 - Gmail integration
 - Flask patterns
 
 ### For System Administrators / DevOps
+
 See: [EXTENSION_SETUP_GUIDE.md](EXTENSION_SETUP_GUIDE.md) - Step 6: Production Deployment
 
 ---
@@ -39,6 +49,7 @@ See: [EXTENSION_SETUP_GUIDE.md](EXTENSION_SETUP_GUIDE.md) - Step 6: Production D
 ## 📦 What You Have
 
 ### 1. Complete Browser Extension
+
 - **Path:** `extension-starter/`
 - **Status:** ✅ Ready to load in Chrome/Firefox/Edge
 - **Lines of Code:** 700+
@@ -48,6 +59,7 @@ See: [EXTENSION_SETUP_GUIDE.md](EXTENSION_SETUP_GUIDE.md) - Step 6: Production D
   - `src/background/` - OAuth handling
 
 ### 2. Flask Backend Service
+
 - **Path:** `backend-starter/`
 - **Status:** ✅ Ready to run locally or deploy
 - **Lines of Code:** 700+
@@ -56,6 +68,7 @@ See: [EXTENSION_SETUP_GUIDE.md](EXTENSION_SETUP_GUIDE.md) - Step 6: Production D
   - `gmail_api.py` - Gmail integration
 
 ### 3. Comprehensive Documentation
+
 - **BROWSER_EXTENSION_PROPOSAL.md** - Architecture & design (50 pages)
 - **EXTENSION_SETUP_GUIDE.md** - Complete setup (30 pages)
 - **STARTER_CODE_SUMMARY.md** - This package overview
@@ -63,6 +76,7 @@ See: [EXTENSION_SETUP_GUIDE.md](EXTENSION_SETUP_GUIDE.md) - Step 6: Production D
 - **backend-starter/README.md** - Backend guide
 
 ### 4. Automated Setup Script
+
 - **Path:** `setup_extension.py`
 - **Status:** ✅ Ready to run
 - **Purpose:** Automates virtual environment and dependencies
@@ -72,6 +86,7 @@ See: [EXTENSION_SETUP_GUIDE.md](EXTENSION_SETUP_GUIDE.md) - Step 6: Production D
 ## ⚡ 5-Minute Quick Start
 
 1. **Run setup:**
+
    ```bash
    python setup_extension.py
    ```
@@ -86,6 +101,7 @@ See: [EXTENSION_SETUP_GUIDE.md](EXTENSION_SETUP_GUIDE.md) - Step 6: Production D
    - Edit `extension-starter/manifest.json` with client ID
 
 4. **Start backend:**
+
    ```bash
    cd backend-starter
    source venv/bin/activate  # or venv\Scripts\activate on Windows
@@ -104,6 +120,7 @@ See: [EXTENSION_SETUP_GUIDE.md](EXTENSION_SETUP_GUIDE.md) - Step 6: Production D
 ## 📖 Detailed Setup (Step-by-Step)
 
 Follow [EXTENSION_SETUP_GUIDE.md](EXTENSION_SETUP_GUIDE.md) for:
+
 - Detailed Google Cloud setup
 - Backend configuration
 - Extension testing
@@ -189,6 +206,7 @@ Secrya_KeepSafe/
 ## 🎯 Use Cases
 
 ### Use Case 1: Gmail User
+
 ```
 1. Install extension from Chrome Web Store (future)
 2. Click "Login with Google"
@@ -198,6 +216,7 @@ Secrya_KeepSafe/
 ```
 
 ### Use Case 2: Security Team
+
 ```
 1. Deploy backend on company server
 2. Distribute extension to team
@@ -207,6 +226,7 @@ Secrya_KeepSafe/
 ```
 
 ### Use Case 3: Custom Integration
+
 ```
 1. Extend backend for Outlook/Apple Mail
 2. Add machine learning scoring
@@ -232,14 +252,14 @@ Secrya_KeepSafe/
 
 ## 🚀 Deployment Options
 
-| Environment | Status | Difficulty |
-|------------|--------|-----------|
-| Local Development | ✅ Ready | Easy |
-| Testing Server | ✅ Ready | Medium |
-| Heroku | ✅ Ready | Medium |
-| AWS EC2 | ✅ Ready | Hard |
-| Docker | Ready | Hard |
-| Chrome Web Store | Ready | Hard |
+| Environment       | Status   | Difficulty |
+| ----------------- | -------- | ---------- |
+| Local Development | ✅ Ready | Easy       |
+| Testing Server    | ✅ Ready | Medium     |
+| Heroku            | ✅ Ready | Medium     |
+| AWS EC2           | ✅ Ready | Hard       |
+| Docker            | Ready    | Hard       |
+| Chrome Web Store  | Ready    | Hard       |
 
 See [EXTENSION_SETUP_GUIDE.md](EXTENSION_SETUP_GUIDE.md) Step 6 for deployment details.
 
@@ -248,6 +268,7 @@ See [EXTENSION_SETUP_GUIDE.md](EXTENSION_SETUP_GUIDE.md) Step 6 for deployment d
 ## 💾 What's Included
 
 ### Code
+
 - ✅ 1500+ lines of production-ready code
 - ✅ Well-commented and documented
 - ✅ Error handling throughout
@@ -255,6 +276,7 @@ See [EXTENSION_SETUP_GUIDE.md](EXTENSION_SETUP_GUIDE.md) Step 6 for deployment d
 - ✅ Security best practices
 
 ### Documentation
+
 - ✅ Technical proposal (50 pages)
 - ✅ Setup guide (30 pages)
 - ✅ API documentation
@@ -262,6 +284,7 @@ See [EXTENSION_SETUP_GUIDE.md](EXTENSION_SETUP_GUIDE.md) Step 6 for deployment d
 - ✅ Troubleshooting guide
 
 ### Tools
+
 - ✅ Automated setup script
 - ✅ Configuration templates
 - ✅ Test endpoints
@@ -294,22 +317,26 @@ A: Check troubleshooting section in [EXTENSION_SETUP_GUIDE.md](EXTENSION_SETUP_G
 ## 🎓 Learning Resources
 
 ### For Understanding the Architecture
+
 - Read: [BROWSER_EXTENSION_PROPOSAL.md](BROWSER_EXTENSION_PROPOSAL.md)
 - Watch: Architecture diagrams
 - Time: 20 minutes
 
 ### For Setting Up
+
 - Read: [EXTENSION_SETUP_GUIDE.md](EXTENSION_SETUP_GUIDE.md)
 - Do: Follow step-by-step
 - Time: 60 minutes
 
 ### For Customizing
+
 - Read: Component READMEs
 - Study: Component code
 - Experiment: Make changes
 - Time: Varies by complexity
 
 ### For Deploying
+
 - Read: Deployment section in [EXTENSION_SETUP_GUIDE.md](EXTENSION_SETUP_GUIDE.md)
 - Choose: Your platform
 - Configure: Environment
@@ -320,18 +347,21 @@ A: Check troubleshooting section in [EXTENSION_SETUP_GUIDE.md](EXTENSION_SETUP_G
 ## 📞 Support
 
 ### Documentation
+
 - [BROWSER_EXTENSION_PROPOSAL.md](BROWSER_EXTENSION_PROPOSAL.md) - Architecture
 - [EXTENSION_SETUP_GUIDE.md](EXTENSION_SETUP_GUIDE.md) - Setup
 - [backend-starter/README.md](backend-starter/README.md) - Backend
 - [extension-starter/README.md](extension-starter/README.md) - Frontend
 
 ### External Resources
+
 - [Gmail API Docs](https://developers.google.com/gmail/api)
 - [Chrome Extension Docs](https://developer.chrome.com/docs/extensions/)
 - [OAuth 2.0 Guide](https://developers.google.com/identity/protocols/oauth2)
 - [Flask Documentation](https://flask.palletsprojects.com/)
 
 ### Troubleshooting
+
 See [EXTENSION_SETUP_GUIDE.md](EXTENSION_SETUP_GUIDE.md) - Troubleshooting Guide
 
 ---
@@ -341,16 +371,19 @@ See [EXTENSION_SETUP_GUIDE.md](EXTENSION_SETUP_GUIDE.md) - Troubleshooting Guide
 **👉 Choose Your Path:**
 
 **Path 1: Just Get It Running (30 min)**
+
 1. Run `python setup_extension.py`
 2. Get OAuth credentials
 3. Follow quick start above
 
 **Path 2: Full Understanding (2 hours)**
+
 1. Read [BROWSER_EXTENSION_PROPOSAL.md](BROWSER_EXTENSION_PROPOSAL.md)
 2. Follow [EXTENSION_SETUP_GUIDE.md](EXTENSION_SETUP_GUIDE.md)
 3. Study component code
 
 **Path 3: Customize & Deploy (4+ hours)**
+
 1. Complete Path 2
 2. Modify code for your needs
 3. Deploy to production
@@ -361,6 +394,7 @@ See [EXTENSION_SETUP_GUIDE.md](EXTENSION_SETUP_GUIDE.md) - Troubleshooting Guide
 ## 🎉 You're All Set!
 
 You have everything needed to:
+
 - ✅ Integrate Secrya with Gmail
 - ✅ Analyze phishing emails in real-time
 - ✅ Deploy to production

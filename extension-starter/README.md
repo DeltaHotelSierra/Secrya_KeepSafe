@@ -41,6 +41,7 @@ Chrome/Firefox extension that integrates Secrya KeepSafe with Gmail for real-tim
 ### 1. Update Google OAuth Credentials
 
 Edit `manifest.json` and replace:
+
 ```json
 "oauth2": {
   "client_id": "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
@@ -52,16 +53,18 @@ Get your Client ID from [Google Cloud Console](https://console.cloud.google.com/
 ### 2. Configure Backend URL
 
 In `src/popup/popup.js`, update:
+
 ```javascript
 const CONFIG = {
-    BACKEND_URL: 'http://localhost:5000',
-    // ...
+  BACKEND_URL: "http://localhost:5000",
+  // ...
 };
 ```
 
 ### 3. Start Backend Service
 
 Ensure the Flask backend is running:
+
 ```bash
 cd ../backend-starter
 python app.py
@@ -125,13 +128,13 @@ The extension communicates with the backend via HTTP requests:
 
 ```javascript
 // Example: Analyze email
-fetch('http://localhost:5000/api/analyze-email', {
-    method: 'POST',
-    headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ email_id: messageId })
+fetch("http://localhost:5000/api/analyze-email", {
+  method: "POST",
+  headers: {
+    Authorization: `Bearer ${token}`,
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({ email_id: messageId }),
 });
 ```
 
@@ -151,10 +154,10 @@ Sent to backend with each API request
 
 ## Keyboard Shortcuts
 
-| Shortcut | Action |
-|----------|--------|
+| Shortcut       | Action                 |
+| -------------- | ---------------------- |
 | `Ctrl+Shift+K` | Toggle extension popup |
-| `Cmd+Shift+K` | Toggle (Mac) |
+| `Cmd+Shift+K`  | Toggle (Mac)           |
 
 (To be configured in manifest.json)
 
@@ -162,51 +165,59 @@ Sent to backend with each API request
 
 The extension requests these permissions:
 
-| Permission | Why |
-|-----------|-----|
-| `identity` | OAuth login to Gmail |
-| `identity.email` | Get user's email address |
-| `https://www.googleapis.com/*` | Gmail API access |
-| `storage` | Store OAuth tokens securely |
+| Permission                     | Why                         |
+| ------------------------------ | --------------------------- |
+| `identity`                     | OAuth login to Gmail        |
+| `identity.email`               | Get user's email address    |
+| `https://www.googleapis.com/*` | Gmail API access            |
+| `storage`                      | Store OAuth tokens securely |
 
 ## Troubleshooting
 
 ### Extension Won't Load
 
 **Solution 1: Check manifest syntax**
+
 ```bash
 # Look for JSON errors in manifest.json
 ```
 
 **Solution 2: Verify file paths**
+
 - Ensure all file paths in manifest.json exist
 - Check icons directory has all required PNG files
 
 ### "Login Failed" Error
 
 **Cause**: Backend service not running
+
 ```bash
 cd backend-starter
 python app.py
 ```
 
 **Cause**: Invalid Google Client ID
+
 - Verify in manifest.json matches your OAuth credentials
 - Regenerate credentials in Google Cloud Console
 
 ### Emails Not Loading
 
 **Cause**: Token expired
+
 - Click "Logout" then "Login with Google" again
 
 **Cause**: Gmail API not enabled
+
 - Visit [Google Cloud Console](https://console.cloud.google.com/)
 - Enable Gmail API for your project
 
 ### "CORS Error"
 
 **Cause**: Backend not configured for extension
+
 - In backend `.env`, set CORS origin to your extension ID:
+
 ```
 chrome-extension://YOUR_EXTENSION_ID
 ```
@@ -223,12 +234,14 @@ chrome-extension://YOUR_EXTENSION_ID
 ### Enable Debug Mode
 
 In Chrome:
+
 1. `chrome://extensions/`
 2. Find Secrya KeepSafe
 3. Click "Details"
 4. Enable "Allow access to file URLs"
 
 In Firefox:
+
 1. `about:debugging`
 2. Check "Enable add-on debugging"
 
@@ -241,6 +254,7 @@ In Firefox:
 ### Reload Extension
 
 While developing, reload after changes:
+
 - Chrome: Click reload icon on extension card
 - Firefox: Click refresh on extension details page
 - Both: `F5` in browser
@@ -296,6 +310,7 @@ While developing, reload after changes:
 ## Security Best Practices
 
 ✅ **Do:**
+
 - Store tokens in `chrome.storage.local` (encrypted)
 - Use HTTPS for all backend communication
 - Validate all user input
@@ -303,6 +318,7 @@ While developing, reload after changes:
 - Request minimal permissions
 
 ❌ **Don't:**
+
 - Store tokens in localStorage
 - Send tokens in URL
 - Cache sensitive data indefinitely
@@ -319,6 +335,7 @@ While developing, reload after changes:
 ## Support & Feedback
 
 Report issues or suggest features:
+
 - GitHub Issues: [project link]
 - Email: support@secrya.example.com
 - Discord: [community link]
@@ -334,6 +351,7 @@ We welcome contributions! See CONTRIBUTING.md for guidelines.
 ## Changelog
 
 ### v1.0.0 (Initial Release)
+
 - OAuth Gmail integration
 - Email analysis
 - Real-time risk scoring

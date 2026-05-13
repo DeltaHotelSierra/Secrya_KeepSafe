@@ -97,6 +97,7 @@ pip install -r requirements.txt
 ```
 
 Dependencies include:
+
 - Flask (web framework)
 - Flask-CORS (cross-origin support)
 - google-auth (OAuth)
@@ -110,6 +111,7 @@ cp .env.example .env
 ```
 
 Edit `.env` and add:
+
 ```
 GOOGLE_CLIENT_ID=your_client_id_from_step_1
 GOOGLE_CLIENT_SECRET=your_client_secret_from_step_1
@@ -125,19 +127,22 @@ python app.py
 ```
 
 Expected output:
+
 ```
  * Running on http://localhost:5000
  * Press CTRL+C to quit
 ```
 
 Test in another terminal:
+
 ```bash
 curl http://localhost:5000/health
 ```
 
 Expected response:
+
 ```json
-{"status": "ok", "service": "Secrya KeepSafe Backend"}
+{ "status": "ok", "service": "Secrya KeepSafe Backend" }
 ```
 
 ✅ Backend is working! Press `CTRL+C` to stop it.
@@ -149,6 +154,7 @@ Expected response:
 ### 3.1 Prepare Extension Files
 
 Files are in `extension-starter/` directory:
+
 ```
 extension-starter/
 ├── manifest.json
@@ -169,6 +175,7 @@ extension-starter/
 If icons don't exist, create 16x16, 48x48, and 128x128 PNG files.
 
 Or use these minimal icon URLs in manifest for testing:
+
 ```json
 "icons": {
   "16": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text x='2' y='12' font-size='14' font-weight='bold' fill='%23667eea'>S</text></svg>",
@@ -182,6 +189,7 @@ Or use these minimal icon URLs in manifest for testing:
 Edit `extension-starter/manifest.json`:
 
 Replace:
+
 ```json
 "oauth2": {
   "client_id": "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
@@ -195,10 +203,11 @@ With your actual Client ID from Step 1.
 Edit `extension-starter/src/popup/popup.js`:
 
 If backend is on different machine/port:
+
 ```javascript
 const CONFIG = {
-    BACKEND_URL: 'http://your-backend-host:5000',
-    // ...
+  BACKEND_URL: "http://your-backend-host:5000",
+  // ...
 };
 ```
 
@@ -227,6 +236,7 @@ const CONFIG = {
 ### 4.1 Start Backend Service
 
 Open a terminal in `backend-starter/`:
+
 ```bash
 # Activate venv if not already
 venv\Scripts\activate  # Windows or source venv/bin/activate
@@ -236,6 +246,7 @@ python app.py
 ```
 
 Output:
+
 ```
 Starting Secrya KeepSafe Backend Service
  * Running on http://localhost:5000
@@ -266,6 +277,7 @@ Starting Secrya KeepSafe Backend Service
 ### 5.1 Adjust Risk Thresholds
 
 In `backend-starter/app.py`, modify analysis parameters:
+
 ```python
 # Example: Adjust sensitivity
 result = analysis.analyze_email(eml_content, sensitivity='high')
@@ -274,6 +286,7 @@ result = analysis.analyze_email(eml_content, sensitivity='high')
 ### 5.2 Enable Report Saving
 
 In backend `.env`:
+
 ```
 SECRYA_ENABLE_REPORT_SAVING=True
 SECRYA_REPORTS_DIR=./reports
@@ -282,25 +295,27 @@ SECRYA_REPORTS_DIR=./reports
 ### 5.3 Add Custom Email Filters
 
 Edit `extension-starter/src/popup/popup.js`:
+
 ```javascript
 async function loadEmails() {
-    // Add custom filter
-    const query = 'from:suspicious-sender@example.com';
-    
-    const response = await fetch(
-        `${CONFIG.BACKEND_URL}/api/emails?query=${encodeURIComponent(query)}`
-    );
-    // ...
+  // Add custom filter
+  const query = "from:suspicious-sender@example.com";
+
+  const response = await fetch(
+    `${CONFIG.BACKEND_URL}/api/emails?query=${encodeURIComponent(query)}`,
+  );
+  // ...
 }
 ```
 
 ### 5.4 Customize UI Theme
 
 Edit `extension-starter/src/popup/popup.css`:
+
 ```css
 /* Change primary color */
 body {
-    background: linear-gradient(135deg, #your-color-1, #your-color-2);
+  background: linear-gradient(135deg, #your-color-1, #your-color-2);
 }
 ```
 
@@ -311,6 +326,7 @@ body {
 ### 6.1 Get OAuth Approval
 
 Before deploying to Chrome Web Store:
+
 1. OAuth consent screen must be set to "Production"
 2. Privacy policy and terms required
 3. Submit OAuth for verification
@@ -331,12 +347,14 @@ Or use nginx/Apache as reverse proxy with SSL.
 ### 6.3 Deploy Backend
 
 Options:
+
 - **Heroku**: Easy, free tier available
 - **AWS**: EC2 instance with proper scaling
 - **DigitalOcean**: Simple droplet deployment
 - **On-premise**: Your own server
 
 Example Heroku deployment:
+
 ```bash
 # Create Procfile
 echo "web: python app.py" > Procfile
@@ -348,6 +366,7 @@ git push heroku main
 ### 6.4 Update Extension for Production
 
 Edit manifest.json:
+
 ```json
 "oauth2": {
   "client_id": "YOUR_PRODUCTION_CLIENT_ID"
@@ -355,9 +374,10 @@ Edit manifest.json:
 ```
 
 Edit popup.js:
+
 ```javascript
 const CONFIG = {
-    BACKEND_URL: 'https://your-production-backend.com',
+  BACKEND_URL: "https://your-production-backend.com",
 };
 ```
 
@@ -376,6 +396,7 @@ const CONFIG = {
 ### Issue: "Extension failed to load"
 
 **Solution:**
+
 1. Check manifest.json syntax (validate JSON online)
 2. Verify all file paths exist
 3. Check console for errors (F12)
@@ -384,6 +405,7 @@ const CONFIG = {
 ### Issue: "Login failed" error
 
 **Solution:**
+
 1. Is backend running? (`python app.py`)
 2. Is backend URL correct in popup.js?
 3. Is `BACKEND_URL` pointing to `http://localhost:5000`?
@@ -392,6 +414,7 @@ const CONFIG = {
 ### Issue: "No emails appear"
 
 **Solution:**
+
 1. Are you logged in? (Check user email displayed)
 2. Is Gmail API enabled? (Check Google Cloud Console)
 3. Do you have emails in your inbox?
@@ -400,6 +423,7 @@ const CONFIG = {
 ### Issue: "Analysis not working"
 
 **Solution:**
+
 1. Backend running?
 2. Token valid? (Try logging out and back in)
 3. Is Secrya module imported? Check backend console
@@ -408,6 +432,7 @@ const CONFIG = {
 ### Issue: "CORS Error"
 
 **Solution:**
+
 1. In backend `.env`, verify CORS settings
 2. Backend should have: `allow_origins=['chrome-extension://*']`
 3. Restart backend after changing `.env`
@@ -415,6 +440,7 @@ const CONFIG = {
 ### Issue: "Token expired"
 
 **Solution:**
+
 1. Click **Logout** in extension
 2. Click **Login with Google** again
 3. Backend handles refresh automatically

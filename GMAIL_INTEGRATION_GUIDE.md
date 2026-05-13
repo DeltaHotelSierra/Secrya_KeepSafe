@@ -21,6 +21,7 @@
 ### Key Concepts
 
 **OAuth 2.0 Token**
+
 - Like a password, but safer
 - User gives permission once
 - Can be used multiple times
@@ -28,6 +29,7 @@
 - Can be "refreshed" for new one
 
 **Gmail API**
+
 - Google's interface for accessing Gmail
 - Requires authentication (token)
 - Returns emails in different formats:
@@ -36,6 +38,7 @@
   - **full** = full message with attachments
 
 **.eml Format**
+
 - Standard email file format (RFC 2822)
 - Contains all headers and body
 - Same format Secrya uses
@@ -50,18 +53,20 @@
 #### **Class: GmailAPIClient**
 
 **What it does:**
+
 ```python
 class GmailAPIClient:
     """Client for Gmail API interactions"""
-    
+
     SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
     # ^^ Only reads emails, doesn't send/delete
-    
+
     def __init__(self, access_token: str):
         # Takes token and creates connection to Gmail
 ```
 
 **Why it matters:**
+
 - Single class handles all Gmail operations
 - Easy to test and maintain
 - Can be reused in multiple places
@@ -114,6 +119,7 @@ except HttpError as e:
 ### Current Security (✅ Good)
 
 1. **Read-only scope**
+
    ```python
    SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
    #              ^^ Only READ, no SEND/DELETE
@@ -183,16 +189,18 @@ I'll now show you **5 practical customizations** to deploy faster:
 **Change in `gmail_api.py`:**
 
 Find this method:
+
 ```python
-def list_messages(self, 
-                 query: str = '', 
+def list_messages(self,
+                 query: str = '',
                  max_results: int = 10,
 ```
 
 Replace the enrichment loop with batching:
+
 ```python
-def list_messages(self, 
-                 query: str = '', 
+def list_messages(self,
+                 query: str = '',
                  max_results: int = 10,
                  page_token: Optional[str] = None) -> Dict:
     """List messages with batched metadata retrieval"""
@@ -203,13 +211,13 @@ def list_messages(self,
             maxResults=max_results,
             pageToken=page_token
         ).execute()
-        
+
         messages = results.get('messages', [])
-        
+
         # Create batch request
         batch = self.service.new_batch_http_request(callback=self._batch_callback)
         metadata_results = {}
-        
+
         for msg in messages:
             batch.add(
                 self.service.users().messages().get(
@@ -220,28 +228,28 @@ def list_messages(self,
                 ),
                 request_id=msg['id']
             )
-        
+
         batch.execute()
-        
+
         # Process batch results
         enriched = []
         for msg in messages:
             meta = metadata_results.get(msg['id'], {})
             headers = meta.get('payload', {}).get('headers', [])
-            
+
             enriched.append({
                 'id': msg['id'],
                 'subject': self._get_header(headers, 'Subject'),
                 'from': self._get_header(headers, 'From'),
                 'date': self._get_header(headers, 'Date')
             })
-        
+
         return {
             'messages': enriched,
             'next_page_token': results.get('nextPageToken'),
             'result_size_estimate': results.get('resultSizeEstimate', 0)
         }
-    
+
     except HttpError as e:
         logger.error(f"Failed to list messages: {e}")
         raise
@@ -291,7 +299,7 @@ def get_message_as_eml(self, message_id: str) -> str:
             return cached_data['content']
         else:
             del self._email_cache[message_id]
-    
+
     # Fetch from API
     try:
         message = self.service.users().messages().get(
@@ -299,18 +307,18 @@ def get_message_as_eml(self, message_id: str) -> str:
             id=message_id,
             format='raw'
         ).execute()
-        
+
         raw_email = base64.urlsafe_b64decode(message['raw'].encode('UTF-8'))
         eml_content = raw_email.decode('utf-8', errors='replace')
-        
+
         # Cache it
         self._email_cache[message_id] = {
             'content': eml_content,
             'time': time.time()
         }
-        
+
         return eml_content
-    
+
     except Exception as e:
         logger.error(f"Failed to get message: {e}")
         raise
@@ -388,16 +396,16 @@ logger = logging.getLogger(__name__)
 
 class OutlookAPIClient:
     """Client for Microsoft Outlook API"""
-    
+
     SCOPES = ['https://graph.microsoft.com/.default']
-    
+
     def __init__(self, access_token: str):
         self.access_token = access_token
         self.headers = {
             'Authorization': f'Bearer {access_token}',
             'Content-Type': 'application/json'
         }
-    
+
     def list_messages(self, max_results: int = 10) -> List[Dict]:
         """Get emails from Outlook"""
         try:
@@ -406,12 +414,12 @@ class OutlookAPIClient:
                 '$top': max_results,
                 '$select': 'id,subject,from,receivedDateTime'
             }
-            
+
             response = requests.get(url, headers=self.headers, params=params)
             response.raise_for_status()
-            
+
             messages = response.json().get('value', [])
-            
+
             return [
                 {
                     'id': msg['id'],
@@ -421,23 +429,23 @@ class OutlookAPIClient:
                 }
                 for msg in messages
             ]
-        
+
         except Exception as e:
             logger.error(f"Failed to list Outlook messages: {e}")
             raise
-    
+
     def get_message_as_eml(self, message_id: str) -> str:
         """Get Outlook email as .eml format"""
         try:
             # Outlook doesn't have native .eml, convert from MIME
             url = f'https://graph.microsoft.com/v1.0/me/messages/{message_id}/$value'
-            
+
             response = requests.get(url, headers=self.headers)
             response.raise_for_status()
-            
+
             # Response is already MIME format (similar to .eml)
             return response.text
-        
+
         except Exception as e:
             logger.error(f"Failed to get Outlook message: {e}")
             raise
@@ -465,14 +473,14 @@ def analyze_email_endpoint():
         data = request.get_json()
         provider = data.get('provider', 'gmail')  # New field
         email_id = data.get('email_id')
-        
+
         # Get appropriate client
         client = get_email_client(provider, request.gmail_token)
         eml_content = client.get_message_as_eml(email_id)
-        
+
         # Rest is same
         result = analysis.analyze_email(eml_content)
-        
+
         return jsonify({
             'success': True,
             'provider': provider,
@@ -480,7 +488,7 @@ def analyze_email_endpoint():
             'risk_score': result.get('risk_score'),
             'indicators': result.get('indicators', [])
         })
-    
+
     except Exception as e:
         logger.error(f"Analysis error: {e}")
         return jsonify({'error': str(e)}), 500
@@ -489,35 +497,35 @@ def analyze_email_endpoint():
 **Update extension `popup.js`:**
 
 ```javascript
-async function selectEmail(emailId, subject, provider = 'gmail') {
-    try {
-        showLoadingSpinner(true);
-        const token = await getStoredToken();
+async function selectEmail(emailId, subject, provider = "gmail") {
+  try {
+    showLoadingSpinner(true);
+    const token = await getStoredToken();
 
-        const response = await fetch(`${CONFIG.BACKEND_URL}/api/analyze-email`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ 
-                email_id: emailId,
-                provider: provider  // New field
-            })
-        });
+    const response = await fetch(`${CONFIG.BACKEND_URL}/api/analyze-email`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email_id: emailId,
+        provider: provider, // New field
+      }),
+    });
 
-        if (!response.ok) {
-            throw new Error(`Analysis failed: ${response.statusText}`);
-        }
-
-        const result = await response.json();
-        displayAnalysisResult(result, subject);
-    } catch (error) {
-        console.error('Analysis error:', error);
-        alert(`Analysis failed: ${error.message}`);
-    } finally {
-        showLoadingSpinner(false);
+    if (!response.ok) {
+      throw new Error(`Analysis failed: ${response.statusText}`);
     }
+
+    const result = await response.json();
+    displayAnalysisResult(result, subject);
+  } catch (error) {
+    console.error("Analysis error:", error);
+    alert(`Analysis failed: ${error.message}`);
+  } finally {
+    showLoadingSpinner(false);
+  }
 }
 ```
 
@@ -542,57 +550,57 @@ logger = logging.getLogger(__name__)
 
 class RiskEnhancer:
     """Enhance risk scores with provider analysis"""
-    
+
     # Trusted provider domains
     TRUSTED_DOMAINS = {
         'google.com', 'microsoft.com', 'apple.com', 'linkedin.com',
         'github.com', 'amazon.com', 'facebook.com', 'twitter.com'
     }
-    
+
     @staticmethod
     def enhance_risk_score(analysis_result: dict, sender_email: str) -> dict:
         """
         Enhance risk score based on sender domain
-        
+
         Args:
             analysis_result: Original Secrya analysis
             sender_email: Sender's email address
-        
+
         Returns:
             Enhanced analysis with adjusted risk score
         """
         try:
             original_score = analysis_result.get('risk_score', 5)
-            
+
             # Extract domain
             if '@' not in sender_email:
                 return analysis_result
-            
+
             domain = sender_email.split('@')[1].lower()
-            
+
             # Trust signals
             indicators = analysis_result.get('indicators', [])
-            
+
             # If from trusted domain, lower risk slightly
             if domain in RiskEnhancer.TRUSTED_DOMAINS:
                 adjusted_score = max(original_score - 1.5, 1)
                 indicators.append('✅ Verified provider domain')
             else:
                 adjusted_score = original_score
-            
+
             # Check for spoofing
             if 'Link mismatch' in str(indicators):
                 adjusted_score = min(adjusted_score + 2, 10)
-            
+
             # Update result
             analysis_result['risk_score'] = round(adjusted_score, 1)
             analysis_result['indicators'] = indicators
-            
+
             # Add confidence
             analysis_result['confidence'] = 'High' if domain in RiskEnhancer.TRUSTED_DOMAINS else 'Medium'
-            
+
             return analysis_result
-        
+
         except Exception as e:
             logger.warning(f"Risk enhancement failed: {e}")
             return analysis_result
@@ -609,20 +617,20 @@ def analyze_email_endpoint():
     try:
         data = request.get_json()
         email_id = data.get('email_id')
-        
+
         gmail = GmailHandler(request.gmail_token)
         eml_content = gmail.get_email_as_eml(email_id)
-        
+
         # Basic analysis
         result = analysis.analyze_email(eml_content)
-        
+
         # Get sender for enhancement
         metadata = gmail.get_message_metadata(email_id)
         sender_email = metadata.get('from', '')
-        
+
         # Enhance with provider signals
         enhanced_result = RiskEnhancer.enhance_risk_score(result, sender_email)
-        
+
         return jsonify({
             'success': True,
             'risk_level': enhanced_result.get('risk_level'),
@@ -630,7 +638,7 @@ def analyze_email_endpoint():
             'confidence': enhanced_result.get('confidence'),
             'indicators': enhanced_result.get('indicators', [])
         })
-    
+
     except Exception as e:
         logger.error(f"Analysis error: {e}")
         return jsonify({'error': str(e)}), 500
@@ -642,13 +650,13 @@ def analyze_email_endpoint():
 
 ## 📊 Customization Summary
 
-| Customization | Time | Impact | Difficulty |
-|---|---|---|---|
-| Batch Email Loading | 2 min | 3x faster | Easy |
-| Add Caching | 3 min | 100x faster repeats | Easy |
-| Better Errors | 2 min | Better UX | Easy |
-| Outlook Support | 15 min | Multi-provider | Medium |
-| Smart Scoring | 5 min | Better accuracy | Medium |
+| Customization       | Time   | Impact              | Difficulty |
+| ------------------- | ------ | ------------------- | ---------- |
+| Batch Email Loading | 2 min  | 3x faster           | Easy       |
+| Add Caching         | 3 min  | 100x faster repeats | Easy       |
+| Better Errors       | 2 min  | Better UX           | Easy       |
+| Outlook Support     | 15 min | Multi-provider      | Medium     |
+| Smart Scoring       | 5 min  | Better accuracy     | Medium     |
 
 ---
 
@@ -672,6 +680,7 @@ Before deploying:
 ## ❓ Questions?
 
 Want me to:
+
 - Implement one of these customizations?
 - Explain any part in more detail?
 - Add a different feature?

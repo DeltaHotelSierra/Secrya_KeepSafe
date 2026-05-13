@@ -23,17 +23,20 @@ Flask-based backend service that bridges the browser extension to Gmail API and 
 ### Installation
 
 1. **Create virtual environment:**
+
    ```bash
    python -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
    ```
 
 2. **Install dependencies:**
+
    ```bash
    pip install -r requirements.txt
    ```
 
 3. **Configure environment:**
+
    ```bash
    cp .env.example .env
    # Edit .env with your Google OAuth credentials
@@ -66,6 +69,7 @@ Flask-based backend service that bridges the browser extension to Gmail API and 
 ### 3. Add Email for Testing
 
 Since the app is in development:
+
 1. Go to OAuth consent screen
 2. Add test users (your Gmail address)
 
@@ -86,34 +90,40 @@ curl http://localhost:5000/health
 ```
 
 Expected response:
+
 ```json
-{"status": "ok", "service": "Secrya KeepSafe Backend"}
+{ "status": "ok", "service": "Secrya KeepSafe Backend" }
 ```
 
 ## API Endpoints
 
 ### Health Check
+
 - **GET** `/health`
 - Returns service status
 
 ### Get Emails List
+
 - **GET** `/api/emails?query=&max_results=10`
 - **Headers:** `Authorization: Bearer {token}`
 - Returns list of emails from inbox
 
 ### Analyze Email
+
 - **POST** `/api/analyze-email`
 - **Headers:** `Authorization: Bearer {token}`
 - **Body:** `{"email_id": "gmail_message_id"}`
 - Returns analysis result with risk score and indicators
 
 ### Analyze URL
+
 - **POST** `/api/analyze-url`
 - **Headers:** `Authorization: Bearer {token}`
 - **Body:** `{"url": "https://example.com"}`
 - Returns URL security analysis
 
 ### Get User Info
+
 - **GET** `/api/user`
 - **Headers:** `Authorization: Bearer {token}`
 - Returns user profile information
@@ -121,12 +131,14 @@ Expected response:
 ## Example Requests
 
 ### Get Emails
+
 ```bash
 curl -H "Authorization: Bearer YOUR_TOKEN" \
   http://localhost:5000/api/emails?max_results=5
 ```
 
 ### Analyze Email
+
 ```bash
 curl -X POST \
   -H "Authorization: Bearer YOUR_TOKEN" \
@@ -136,6 +148,7 @@ curl -X POST \
 ```
 
 ### Analyze URL
+
 ```bash
 curl -X POST \
   -H "Authorization: Bearer YOUR_TOKEN" \
@@ -147,28 +160,25 @@ curl -X POST \
 ## Response Format
 
 ### Successful Analysis Response
+
 ```json
 {
   "success": true,
   "email_id": "12345",
   "risk_level": "MEDIUM",
   "risk_score": 6.5,
-  "indicators": [
-    "Urgency language",
-    "Link mismatch"
-  ],
+  "indicators": ["Urgency language", "Link mismatch"],
   "explanations": [
     "Contains urgent keywords",
     "Sender domain doesn't match URL"
   ],
-  "recommendations": [
-    "Verify through official channel"
-  ],
+  "recommendations": ["Verify through official channel"],
   "timestamp": "2026-05-13T10:30:00"
 }
 ```
 
 ### Error Response
+
 ```json
 {
   "error": "Error message description"
@@ -211,19 +221,23 @@ backend-starter/
 ## Troubleshooting
 
 ### Token Expired
+
 - The backend handles token refresh automatically
 - If error persists, re-authenticate in the extension
 
 ### Gmail API Error
+
 - Verify OAuth credentials in `.env`
 - Check that Gmail API is enabled in Google Cloud Console
 - Confirm test user email is added to OAuth consent screen
 
 ### CORS Issues
+
 - Ensure extension ID is in `CORS_ALLOWED_ORIGINS`
 - Check extension manifest.json has correct permissions
 
 ### Connection Refused
+
 - Verify backend is running on `localhost:5000`
 - Check firewall isn't blocking port 5000
 - Review logs in `logs/` directory
@@ -242,6 +256,7 @@ backend-starter/
 Logs are saved to `logs/secrya_backend.log`
 
 View recent logs:
+
 ```bash
 tail -f logs/secrya_backend.log
 ```
@@ -249,11 +264,13 @@ tail -f logs/secrya_backend.log
 ## Development Tips
 
 ### Enable Debug Mode
+
 ```python
 app.run(debug=True)  # In app.py
 ```
 
 ### Test Gmail Integration
+
 ```python
 from gmail_api import GmailAPIClient
 
@@ -263,6 +280,7 @@ print(profile)
 ```
 
 ### Mock Responses for Testing
+
 See `tests/` directory for example test files (to be created)
 
 ## Next Steps

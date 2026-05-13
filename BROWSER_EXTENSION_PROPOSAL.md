@@ -1,7 +1,9 @@
 # Secrya KeepSafe Browser Extension Proposal
+
 ## Email Integration via Gmail API & .eml File Analysis
 
 ### Overview
+
 This proposal outlines a browser extension that connects Secrya KeepSafe to Gmail (and potentially other email providers) to retrieve and analyze emails directly without manual file downloads.
 
 ---
@@ -51,6 +53,7 @@ This proposal outlines a browser extension that connects Secrya KeepSafe to Gmai
 ### 1. Browser Extension (Chrome/Firefox/Edge)
 
 #### Structure:
+
 ```
 secrya-extension/
 ├── manifest.json          # Extension configuration
@@ -72,6 +75,7 @@ secrya-extension/
 ```
 
 #### Key Features:
+
 - **OAuth 2.0 Login**: Users authenticate with their Google account securely
 - **Email List View**: Display inbox with preview
 - **One-Click Analysis**: Select and analyze emails
@@ -79,19 +83,15 @@ secrya-extension/
 - **History**: Track analyzed emails
 
 #### manifest.json example:
+
 ```json
 {
   "manifest_version": 3,
   "name": "Secrya KeepSafe",
   "version": "1.0.0",
   "description": "Analyze phishing emails directly from Gmail",
-  "permissions": [
-    "identity",
-    "identity.email"
-  ],
-  "host_permissions": [
-    "https://www.googleapis.com/*"
-  ],
+  "permissions": ["identity", "identity.email"],
+  "host_permissions": ["https://www.googleapis.com/*"],
   "action": {
     "default_popup": "src/popup/popup.html",
     "default_icons": {
@@ -105,9 +105,7 @@ secrya-extension/
   },
   "oauth2": {
     "client_id": "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com",
-    "scopes": [
-      "https://www.googleapis.com/auth/gmail.readonly"
-    ]
+    "scopes": ["https://www.googleapis.com/auth/gmail.readonly"]
   }
 }
 ```
@@ -119,6 +117,7 @@ secrya-extension/
 This service runs locally and acts as a bridge between the browser extension and Secrya KeepSafe.
 
 #### Purpose:
+
 - Handles OAuth 2.0 token management
 - Calls Gmail API to retrieve emails
 - Converts email to .eml format
@@ -128,6 +127,7 @@ This service runs locally and acts as a bridge between the browser extension and
 #### Stack Options:
 
 **Option A: Flask (Lightweight)**
+
 ```python
 from flask import Flask, request, jsonify
 from flask_cors import CORS
@@ -142,16 +142,16 @@ CORS(app)
 def analyze_email():
     email_id = request.json.get('email_id')
     gmail_token = request.json.get('token')
-    
+
     # Fetch email via Gmail API
     email_content = fetch_gmail_email(email_id, gmail_token)
-    
+
     # Convert to .eml format
     eml_content = convert_to_eml(email_content)
-    
+
     # Analyze using existing Secrya logic
     result = analysis.analyze_email(eml_content)
-    
+
     return jsonify(result)
 
 @app.route('/auth/callback', methods=['POST'])
@@ -165,6 +165,7 @@ if __name__ == '__main__':
 ```
 
 **Option B: FastAPI (Modern, Async)**
+
 ```python
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -179,7 +180,7 @@ async def analyze_email(email_id: str, token: str):
     async with httpx.AsyncClient() as client:
         # Fetch from Gmail API
         email_content = await fetch_gmail_email(email_id, token, client)
-    
+
     # Convert and analyze
     result = analysis.analyze_email(email_content)
     return result
@@ -190,6 +191,7 @@ async def analyze_email(email_id: str, token: str):
 ### 3. Gmail API Integration
 
 #### Required Setup:
+
 1. Create Google Cloud Project
 2. Enable Gmail API
 3. Create OAuth 2.0 credentials (Desktop/Extension)
@@ -210,7 +212,7 @@ from email.mime.text import MIMEText
 class GmailHandler:
     def __init__(self, token):
         self.service = build('gmail', 'v1', credentials=token)
-    
+
     def get_email_as_eml(self, message_id):
         """Retrieve Gmail email and convert to .eml format"""
         try:
@@ -220,15 +222,15 @@ class GmailHandler:
                 id=message_id,
                 format='raw'
             ).execute()
-            
+
             # raw format returns base64 encoded RFC 2822 format (.eml)
             raw_email = base64.urlsafe_b64decode(message['raw'].encode('UTF-8'))
             return raw_email.decode('utf-8')
-        
+
         except Exception as e:
             print(f"Error retrieving email: {e}")
             return None
-    
+
     def list_emails(self, query='', max_results=10):
         """List emails from inbox"""
         try:
@@ -283,6 +285,7 @@ User can save report or mark as spam
 ## Implementation Steps
 
 ### Phase 1: Backend Service (1-2 weeks)
+
 - [ ] Create Flask/FastAPI service
 - [ ] Implement OAuth 2.0 flow
 - [ ] Implement Gmail API integration
@@ -290,6 +293,7 @@ User can save report or mark as spam
 - [ ] Add error handling & logging
 
 ### Phase 2: Browser Extension (2-3 weeks)
+
 - [ ] Set up extension project structure
 - [ ] Create manifest.json
 - [ ] Build popup UI (HTML/CSS)
@@ -298,12 +302,14 @@ User can save report or mark as spam
 - [ ] Add analysis display
 
 ### Phase 3: Integration (1 week)
+
 - [ ] Connect extension to backend
 - [ ] Test end-to-end flow
 - [ ] Add caching/optimization
 - [ ] Security review
 
 ### Phase 4: Enhancement (Optional)
+
 - [ ] Support Outlook, Apple Mail
 - [ ] Add bulk analysis
 - [ ] Implement machine learning scoring
@@ -315,24 +321,28 @@ User can save report or mark as spam
 ## Security Considerations
 
 ### 1. OAuth 2.0 Token Management
+
 - Store tokens securely (not in localStorage)
 - Use extension's secure storage API
 - Implement token refresh logic
 - Auto-logout after inactivity
 
 ### 2. Data Privacy
+
 - .eml files processed locally only
 - No data transmitted to external servers (except Gmail API)
 - Clear user consent for OAuth scopes
 - HTTPS only for all communications
 
 ### 3. API Key Protection
+
 - Store Google Client ID/Secret securely
 - Never expose in extension code
 - Use backend service as middleware
 - Implement rate limiting
 
 ### 4. Code Security
+
 - Input validation on all email content
 - Sanitize HTML rendering
 - Content Security Policy (CSP) headers
@@ -357,6 +367,7 @@ Links: https://example.com
 ```
 
 **Why .eml?**
+
 - Standard email format
 - Compatible with Secrya's existing parser
 - Preserves all headers and metadata
@@ -400,30 +411,33 @@ Links: https://example.com
 
 ## Technology Stack Summary
 
-| Layer | Technology | Why |
-|-------|-----------|-----|
-| Frontend | HTML/CSS/JavaScript | Native, no build tools needed |
-| Backend | Flask/FastAPI | Lightweight, Python integration |
-| Gmail API | Google Cloud | Official, reliable |
-| Email Parsing | Python email lib | Already used in Secrya |
-| Analysis | Existing Secrya code | Reuse current logic |
-| Storage | Browser storage + local | Privacy-first |
+| Layer         | Technology              | Why                             |
+| ------------- | ----------------------- | ------------------------------- |
+| Frontend      | HTML/CSS/JavaScript     | Native, no build tools needed   |
+| Backend       | Flask/FastAPI           | Lightweight, Python integration |
+| Gmail API     | Google Cloud            | Official, reliable              |
+| Email Parsing | Python email lib        | Already used in Secrya          |
+| Analysis      | Existing Secrya code    | Reuse current logic             |
+| Storage       | Browser storage + local | Privacy-first                   |
 
 ---
 
 ## Alternatives Considered
 
 ### Option 1: Web-based Application
+
 - ❌ Requires email forwarding (privacy risk)
 - ❌ More server infrastructure
 - ✅ Cross-platform support
 
 ### Option 2: Direct Gmail Integration (no backend)
+
 - ❌ Can't run Python analysis in browser
 - ❌ Security issues with exposing tokens
 - ✅ Simpler deployment
 
 ### Option 3: Native Electron App
+
 - ✅ More powerful
 - ❌ Overkill for this use case
 - ❌ Larger download size
