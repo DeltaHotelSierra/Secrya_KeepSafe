@@ -91,3 +91,17 @@ daniel santos
 ok good now recheck all file and folder to check for any usless code that is not being used or is extra to improve preformace but dont dont get rid of any crucial code or code that will collpase the build, create a readme file with specific and straigh foward instructions or how to add this to your own computer / customers computer explain each featue and how to use, provide spaces for screen shots, provide instructions for linuxmac and windowns, include version author = owner of repo, we are on version 1.3.1
 
 version 1.3.1
+
+
+# 9th Prompt
+
+daniel santos
+
+
+# 10th Prompt
+
+
+daniel sanrtos 
+
+
+update read.me file for instructions for downloading and running
