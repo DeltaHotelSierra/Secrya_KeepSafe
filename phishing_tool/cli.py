@@ -54,7 +54,8 @@ def _list_email_files(folder: Path) -> list:
     if not folder.exists():
         return []
     email_files = sorted(
-        [f for f in folder.iterdir() if f.is_file() and f.suffix.lower() in {".txt", ".eml"}]
+        [f for f in folder.iterdir() if f.is_file() and f.suffix.lower()
+         in {".txt", ".eml"}]
     )
     return email_files
 
