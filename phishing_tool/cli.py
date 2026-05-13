@@ -50,10 +50,12 @@ def setup_parser() -> argparse.ArgumentParser:
 
 
 def _list_email_files(folder: Path) -> list:
-    """List all text email files in the given folder."""
+    """List all supported email files in the given folder."""
     if not folder.exists():
         return []
-    email_files = sorted([f for f in folder.glob("*.txt")])
+    email_files = sorted(
+        [f for f in folder.iterdir() if f.is_file() and f.suffix.lower() in {".txt", ".eml"}]
+    )
     return email_files
 
 
