@@ -50,6 +50,12 @@ def setup_parser() -> argparse.ArgumentParser:
         help="Optional filename prefix when saving a generated template",
     )
     parser.add_argument(
+        "--list-templates",
+        action="store_true",
+        dest="list_templates",
+        help="List generated templates saved in GENERATED_EMAILS/",
+    )
+    parser.add_argument(
         "--interactive",
         action="store_true",
         dest="interactive",

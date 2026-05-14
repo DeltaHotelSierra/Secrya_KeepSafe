@@ -19,7 +19,7 @@ def main() -> None:
         print(ui.create_banner())
         parser = cli.setup_parser()
         args = parser.parse_args()
-        if not any([args.analyze, args.analyze_url, args.generate_template, args.interactive]):
+        if not any([args.analyze, args.analyze_url, args.generate_template, args.interactive, getattr(args, 'list_templates', False)]):
             parser.print_help()
             return
         if args.analyze:
@@ -44,6 +44,14 @@ def main() -> None:
             name = getattr(args, "template_name", None)
             out = templates.generate_template(args.generate_template, save=save_flag, name=name)
             print(out)
+        elif getattr(args, "list_templates", False):
+            entries = templates.list_generated_templates()
+            if not entries:
+                ui.print_info("No generated templates found in GENERATED_EMAILS/")
+                return
+            ui.print_header("Generated Templates")
+            for idx, e in enumerate(entries, 1):
+                print(f"{idx}. {e['name']}  (created: {e['created_iso']})")
         elif args.interactive:
             cli.handle_interactive_menu()
     except Exception as e:
