@@ -100,25 +100,41 @@ def perform_dns_lookup(domain: str) -> tuple:
         return False, [], f"Lookup error: {str(e)}"
 
 
-def check_against_known_domains(domain: str, resolved_ips: list) -> tuple:
+def get_base_domain(domain: str) -> str:
+    """Return the base domain portion of a hostname."""
+    parts = domain.split('.')
+    return '.'.join(parts[-2:]) if len(parts) >= 2 else domain
+
+
+def check_against_known_domains(domain: str, resolved_ips: list, has_special: bool = False) -> tuple:
     """Check if domain and IPs match known legitimate company domains.
 
-    Returns: (is_verified, verification_details)
+    Returns: (is_verified, verification_details, known_base_domain)
     """
-    # Extract base domain (e.g., mail.google.com -> google.com)
-    parts = domain.split('.')
-    base_domain = '.'.join(parts[-2:]) if len(parts) >= 2 else domain
+    base_domain = get_base_domain(domain)
 
     if base_domain not in KNOWN_DOMAINS:
-        return False, f"Domain '{base_domain}' not in known legitimate domains database"
+        return False, (
+            f"Domain '{base_domain}' is not in the static known domain list. "
+            "DNS resolution succeeded, but this site is not part of the sample database."
+        ), False
 
     known_ips = KNOWN_DOMAINS[base_domain]
     matching_ips = [ip for ip in resolved_ips if ip in known_ips]
 
     if matching_ips:
-        return True, f"✓ Verified: Domain resolves to known legitimate IP(s): {', '.join(matching_ips)}"
-    else:
-        return False, f"⚠ Domain exists but IP mismatch. Expected: {known_ips}, Got: {resolved_ips}"
+        return True, f"✓ Verified: Domain resolves to known legitimate IP(s): {', '.join(matching_ips)}", True
+
+    if has_special:
+        return False, (
+            f"⚠ Domain is a known base domain ({base_domain}) but contains suspicious character patterns. "
+            f"Resolved IPs: {resolved_ips}"
+        ), True
+
+    return False, (
+        f"Domain is a known base domain ({base_domain}) and DNS resolved successfully, but the resolved IPs differ from the sample list. "
+        "Large services often use dynamic IP ranges or CDN endpoints."
+    ), True
 
 
 def analyze_url_security(url: str) -> dict:
@@ -148,9 +164,10 @@ def analyze_url_security(url: str) -> dict:
     # Check against known domains
     is_verified = False
     verification_status = ""
+    known_base_domain = False
     if dns_resolved:
-        is_verified, verification_status = check_against_known_domains(
-            domain, resolved_ips)
+        is_verified, verification_status, known_base_domain = check_against_known_domains(
+            domain, resolved_ips, has_special)
 
     # Determine risk score and level
     risk_indicators = []
@@ -161,8 +178,12 @@ def analyze_url_security(url: str) -> dict:
         risk_indicators.append(f"DNS resolution failed: {dns_error}")
 
     if dns_resolved and not is_verified:
-        risk_indicators.append(
-            "Domain resolves but IP not verified against known legitimate IPs")
+        if known_base_domain:
+            risk_indicators.append(
+                "Domain resolves successfully but resolved IPs differ from the sample list")
+        else:
+            risk_indicators.append(
+                "Domain resolves successfully but is not in the static known domain list")
 
     risk_score = 0
     if not dns_resolved:
@@ -192,10 +213,16 @@ def analyze_url_security(url: str) -> dict:
         recommendations.append(
             "Verify the correct spelling with official sources")
     elif not is_verified and dns_resolved:
-        recommendations.append(
-            "Domain resolves but not in known legitimate domains database")
-        recommendations.append(
-            "Verify through official company channels before clicking")
+        if known_base_domain:
+            recommendations.append(
+                "Domain resolves successfully, but resolved IPs differ from the sample list")
+            recommendations.append(
+                "Verify through official company channels before clicking if unsure")
+        else:
+            recommendations.append(
+                "Domain resolves successfully, but this website is not in the static known domain list")
+            recommendations.append(
+                "Verify the URL carefully if the source is unfamiliar")
     else:
         recommendations.append("Domain appears legitimate")
         recommendations.append(
