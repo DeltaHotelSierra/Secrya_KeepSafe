@@ -36,7 +36,10 @@ def generate_template(tactic: str, *, save: bool = False, name: Optional[str] = 
         str: Formatted template text. If `save=True` the returned string will have a
         final line indicating the saved file path.
     """
-    t = (tactic or "").lower()
+    if tactic is None:
+        raise ValueError("tactic must be provided (supported: " + ", ".join(get_supported_tactics()) + ")")
+    # Normalize input
+    t = str(tactic).strip().lower()
     if t == "spoofing":
         text = (
             "EDUCATIONAL TEMPLATE: Email Spoofing\n"
@@ -120,7 +123,21 @@ def generate_template(tactic: str, *, save: bool = False, name: Optional[str] = 
             "Defense: Avoid clicking links in unexpected SMS, verify with the sender through official channels, and report suspicious texts.\n"
         )
     else:
-        return f"Error: Unknown template type '{tactic}'. Supported: spoofing, typosquatting, urgency, social_engineering, pretexting, vishing, smishing"
+        supported = ", ".join(get_supported_tactics())
+        raise ValueError(f"Unknown template type '{tactic}'. Supported: {supported}")
+
+
+def get_supported_tactics() -> list:
+    """Return the list of supported tactic names (strings)."""
+    return [
+        "spoofing",
+        "typosquatting",
+        "urgency",
+        "social_engineering",
+        "pretexting",
+        "vishing",
+        "smishing",
+    ]
 
     if save:
         d = _ensure_generated_dir()
