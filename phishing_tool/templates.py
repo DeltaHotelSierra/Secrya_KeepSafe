@@ -132,9 +132,19 @@ def generate_template(tactic: str, *, save: bool = False, name: Optional[str] = 
         d = _ensure_generated_dir()
         prefix = (name or tactic or "template").strip()
         stem = _slugify(prefix)
-        ts = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
-        fname = f"{stem}_{ts}.txt"
+        # Use local time for filenames per user's request
+        ts_local = datetime.now().strftime("%Y%m%d_%H%M%S")
+        fname = f"{stem}_{ts_local}.txt"
         path = d / fname
+        # Avoid collisions by appending a counter suffix if the file exists
+        if path.exists():
+            counter = 1
+            while True:
+                candidate = d / f"{stem}_{ts_local}_{counter}.txt"
+                if not candidate.exists():
+                    path = candidate
+                    break
+                counter += 1
         path.write_text(text, encoding="utf-8")
         return text + f"\n\nSaved to: {str(path)}"
 
