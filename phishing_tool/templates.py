@@ -139,6 +139,31 @@ def get_supported_tactics() -> list:
         "smishing",
     ]
 
+
+def list_generated_templates() -> list:
+    """Scan the GENERATED_EMAILS directory and return a list of saved template
+    files with their creation timestamps.
+
+    Returns:
+        list of dict objects: [{'name': filename, 'created_iso': 'YYYY-MM-DDTHH:MM:SSZ'}, ...]
+        Sorted newest first by file modification time.
+    """
+    d = GENERATED_DIR
+    if not d.exists():
+        return []
+    files = [p for p in d.iterdir() if p.is_file()]
+    # Sort by modification time descending (newest first)
+    files.sort(key=lambda p: p.stat().st_mtime, reverse=True)
+    out = []
+    for p in files:
+        mtime = p.stat().st_mtime
+        # Use UTC ISO format
+        from datetime import datetime
+
+        created_iso = datetime.utcfromtimestamp(mtime).strftime("%Y-%m-%dT%H:%M:%SZ")
+        out.append({"name": p.name, "created_iso": created_iso})
+    return out
+
     if save:
         d = _ensure_generated_dir()
         prefix = (name or tactic or "template").strip()
