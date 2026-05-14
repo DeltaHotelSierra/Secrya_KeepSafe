@@ -86,8 +86,41 @@ def generate_template(tactic: str, *, save: bool = False, name: Optional[str] = 
             "Explanation: Attackers create urgency and authority to collect credentials.\n"
             "Defense: Never provide passwords via email; use official channels and MFA.\n"
         )
+    elif t == "pretexting":
+        text = (
+            "EDUCATIONAL TEMPLATE: Pretexting\n"
+            "--------------------------------------------------\n"
+            "Example pretext:\n"
+            "  Caller: IT Support <it-support@company.com>\n"
+            "  Message: We detected abnormal activity on your account; please provide your login to verify.\n"
+            "\n"
+            "Explanation: The attacker invents a believable scenario (the pretext) to obtain information or access.\n"
+            "Defense: Verify the request through independent channels, do not share credentials, and escalate suspicious calls.\n"
+        )
+    elif t == "vishing":
+        text = (
+            "EDUCATIONAL TEMPLATE: Vishing (Voice Phishing)\n"
+            "--------------------------------------------------\n"
+            "Example voicemail/call script:\n"
+            "  Caller: Bank Security\n"
+            "  Message: We need to confirm recent transactions; please call back and verify your card number.\n"
+            "\n"
+            "Explanation: Attackers use phone calls to impersonate trusted organizations and extract sensitive information.\n"
+            "Defense: Do not provide sensitive data over unsolicited calls; hang up and call the official number from your account statement.\n"
+        )
+    elif t == "smishing":
+        text = (
+            "EDUCATIONAL TEMPLATE: Smishing (SMS Phishing)\n"
+            "--------------------------------------------------\n"
+            "Example SMS:\n"
+            "  From: +1-800-555-0123\n"
+            "  Message: Urgent: Your package delivery failed. Click http://track.example to reschedule.\n"
+            "\n"
+            "Explanation: Phishing via SMS attempts to trick users into clicking links or sharing info via mobile messages.\n"
+            "Defense: Avoid clicking links in unexpected SMS, verify with the sender through official channels, and report suspicious texts.\n"
+        )
     else:
-        return f"Error: Unknown template type '{tactic}'. Supported: spoofing, typosquatting, urgency, social_engineering"
+        return f"Error: Unknown template type '{tactic}'. Supported: spoofing, typosquatting, urgency, social_engineering, pretexting, vishing, smishing"
 
     if save:
         d = _ensure_generated_dir()
