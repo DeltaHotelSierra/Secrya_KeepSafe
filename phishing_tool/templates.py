@@ -126,6 +126,20 @@ def generate_template(tactic: str, *, save: bool = False, name: Optional[str] = 
         supported = ", ".join(get_supported_tactics())
         raise ValueError(f"Unknown template type '{tactic}'. Supported: {supported}")
 
+    # At this point a `text` variable has been assigned for a known tactic.
+    # Optionally save to disk and return a note about the saved path.
+    if save:
+        d = _ensure_generated_dir()
+        prefix = (name or tactic or "template").strip()
+        stem = _slugify(prefix)
+        ts = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+        fname = f"{stem}_{ts}.txt"
+        path = d / fname
+        path.write_text(text, encoding="utf-8")
+        return text + f"\n\nSaved to: {str(path)}"
+
+    return text
+
 
 def get_supported_tactics() -> list:
     """Return the list of supported tactic names (strings)."""
@@ -152,27 +166,23 @@ def list_generated_templates() -> list:
     if not d.exists():
         return []
     files = [p for p in d.iterdir() if p.is_file()]
-    # Sort by modification time descending (newest first)
-    files.sort(key=lambda p: p.stat().st_mtime, reverse=True)
+
+    # Determine a creation timestamp for each file. On macOS a `st_birthtime`
+    # attribute is typically available; otherwise fall back to mtime. Use UTC
+    # ISO format for the returned timestamps.
+    def _created_ts(path: Path) -> float:
+        st = path.stat()
+        # Some platforms (macOS) expose st_birthtime for creation time
+        if hasattr(st, "st_birthtime"):
+            return float(st.st_birthtime)
+        # Fallback to mtime
+        return float(st.st_mtime)
+
+    files.sort(key=_created_ts, reverse=True)
     out = []
     for p in files:
-        mtime = p.stat().st_mtime
-        # Use UTC ISO format
-        from datetime import datetime
-
-        created_iso = datetime.utcfromtimestamp(mtime).strftime("%Y-%m-%dT%H:%M:%SZ")
+        ts = _created_ts(p)
+        created_iso = datetime.utcfromtimestamp(ts).strftime("%Y-%m-%dT%H:%M:%SZ")
         out.append({"name": p.name, "created_iso": created_iso})
     return out
-
-    if save:
-        d = _ensure_generated_dir()
-        prefix = (name or tactic or "template").strip()
-        stem = _slugify(prefix)
-        ts = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
-        fname = f"{stem}_{ts}.txt"
-        path = d / fname
-        path.write_text(text, encoding="utf-8")
-        return text + f"\n\nSaved to: {str(path)}"
-
-    return text
 
