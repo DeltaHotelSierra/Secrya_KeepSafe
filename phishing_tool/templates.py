@@ -16,11 +16,31 @@ GENERATED_DIR = Path(__file__).resolve().parent / "GENERATED_EMAILS"
 
 
 def _ensure_generated_dir() -> Path:
+    """Ensure the GENERATED_EMAILS directory exists and return its Path.
+
+    Creates the directory (including parents) if it does not already exist.
+
+    Returns:
+        pathlib.Path: Absolute path to the directory used for generated emails.
+    """
     GENERATED_DIR.mkdir(parents=True, exist_ok=True)
     return GENERATED_DIR
 
 
 def _slugify(value: str) -> str:
+    """Create a filesystem-safe slug from an arbitrary string.
+
+    Non-alphanumeric characters are replaced with underscores except for
+    dot, underscore and dash which are allowed. Leading/trailing dots,
+    underscores and dashes are stripped. If the resulting slug is empty,
+    the literal string "template" is returned.
+
+    Args:
+        value (str): Input string to convert into a slug.
+
+    Returns:
+        str: A safe filename-friendly slug.
+    """
     return "".join(c if c.isalnum() or c in "._-" else "_" for c in value).strip("_.-") or "template"
 
 
