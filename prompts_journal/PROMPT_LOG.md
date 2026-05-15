@@ -146,3 +146,8 @@ Jonathan Bam
 Refactor the save block in generate_template to avoid filename collisions 
 by checking if the file already exists before writing, and use local 
 timezone instead of UTC in the timestamp.
+
+
+daniel sanrtos
+
+update README with instructions for downloading and running
