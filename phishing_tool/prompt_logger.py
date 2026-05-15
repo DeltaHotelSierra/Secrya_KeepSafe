@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 
@@ -57,7 +57,7 @@ class PromptLogger:
         Returns True on success, False on error.
         """
         entry_num = self._get_next_prompt_number()
-        timestamp = datetime.utcnow().isoformat() + "Z"
+        timestamp = datetime.now(timezone.utc).isoformat()
         parts = [
             f"## Prompt #{entry_num}: {component_name}",
             f"**Date:** {timestamp}",
