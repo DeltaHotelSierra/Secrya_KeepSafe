@@ -1,0 +1,13 @@
+EDUCATIONAL TEMPLATE: Email Spoofing
+--------------------------------------------------
+From: CEO <ceo@company.com>
+Subject: Urgent: Wire transfer required
+
+Example:
+From: Jane Doe <jane.doe@company.com>
+To: finance@company.com
+Subject: Urgent: approve wire transfer
+
+A malicious actor forges the From header so the email appears to come from a trusted executive.
+Why it works: Attackers spoof display names and use subtle domain typos to exploit trust.
+Defense: Verify sender email addresses, inspect full headers, and call known contacts on their published numbers.

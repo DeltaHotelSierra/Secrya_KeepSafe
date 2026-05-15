@@ -1,6 +1,28 @@
+# Virtual environments
 /.venv/
-venv/
+/venv/
+/env/
+/ENV/
+
+# Python cache
 __pycache__/
 *.py[cod]
 *.egg-info/
+.pytest_cache/
+.tox/
+
+# IDEs
+.vscode/settings.json
+.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+pip-install.log
+
+# OS
 .DS_Store
+Thumbs.db

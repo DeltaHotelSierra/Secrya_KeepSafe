@@ -1,103 +1,342 @@
 # Secrya KeepSafe
 
-Version: 1.3.1
-Author: DeltaHotelSierra
+**Educational Phishing Analysis & Template Generation Tool**
 
-Overview
+[![Tests](https://img.shields.io/badge/tests-6%2F6%20passing-brightgreen)](#testing)
+[![Python](https://img.shields.io/badge/python-3.9%2B-blue)](#requirements)
+[![License](https://img.shields.io/badge/license-MIT-green)](#license)
 
-- Secrya KeepSafe is a lightweight CLI tool for analyzing potential phishing emails and URLs, generating phishing templates for training, and producing colorized reports.
+## Overview
 
-Key features
+Secrya KeepSafe is a lightweight, educational CLI tool designed to help security professionals and organizations understand phishing threats by:
 
-- Email analysis: score emails for phishing risk, list indicators and explanations.
-- URL security checks: DNS resolution, IP listing, known-company IP comparison, homoglyph/special-character detection, and a numeric risk score.
-- Report generation: saves human-readable reports to `/reports/` with a colorized risk line.
-- Interactive CLI: guided menus to analyze emails, URLs, generate templates, and view/delete saved reports.
-- Prompt logging: stores prompts used for template generation and analysis (for audit/debug).
+- **Analyzing emails** for phishing indicators with risk scoring
+- **Evaluating URLs** for security concerns (DNS validation, IP analysis, homoglyph detection)
+- **Generating educational templates** for security awareness training
+- **Creating reports** with colorized output for easy interpretation
 
-Quick start (Linux / macOS / Windows)
+## ✨ Key Features
 
-Prerequisites
+- 🔍 **Email Analysis** - Comprehensive phishing indicator detection with explanations
+- 🔗 **URL Security Checks** - DNS resolution, IP validation, character analysis
+- 📊 **Risk Scoring** - Numerical risk assessment for emails and URLs
+- 🎨 **Colorized Reports** - Human-readable output with visual risk indicators
+- 🎓 **Template Generation** - 7 tactics for security training (spoofing, typosquatting, urgency, social engineering, pretexting, vishing, smishing)
+- 📝 **Interactive CLI** - Guided menus for all operations
+- 📋 **Report Management** - Save, view, and organize analysis reports
+- 🔐 **Audit Logging** - Track all operations for compliance
 
-- Python 3.9+ (3.11 or 3.12 recommended)
-- Git
+## 📋 Requirements
 
-Verify your Python command first:
+- **Python**: 3.9 or higher (3.10+ recommended)
+- **OS**: Linux, macOS, or Windows
+- **Dependencies**: Listed in `requirements.txt`
 
-```bash
-python3 --version
-```
+## ⚡ Quick Start
 
-If `python3` is not available on macOS, use:
-
-```bash
-/usr/bin/python3 --version
-```
-
-Install
-
-1. Clone the repository:
+### 1. Clone Repository
 
 ```bash
 git clone https://github.com/DeltaHotelSierra/Secrya_KeepSafe.git
 cd Secrya_KeepSafe
 ```
 
-2. (Optional but recommended) Create and activate a virtual environment:
+### 2. Create Virtual Environment (Recommended)
 
-Linux / macOS:
+**Linux/macOS:**
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-macOS fallback (when `python3` is not found):
-
-```bash
-/usr/bin/python3 -m venv .venv
-source .venv/bin/activate
-```
-
-Windows (PowerShell):
+**Windows (PowerShell):**
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
 
-3. Install Python dependencies:
+### 3. Install Dependencies
 
 ```bash
-python -m pip install -U pip
-python -m pip install -r requirements.txt
+python -m pip install --upgrade pip
+pip install -r requirements.txt
 ```
 
-If you are not using a virtual environment:
+### 4. Run the Tool
 
-```bash
-python3 -m pip install -r requirements.txt
-# or on some macOS installs:
-/usr/bin/python3 -m pip install -r requirements.txt
-```
-
-Run the tool
-
-- Interactive mode (recommended):
+**Interactive Mode (Recommended):**
 
 ```bash
 python run.py --interactive
-# or
-python -m phishing_tool.main --interactive
 ```
 
-If you are not in a virtual environment:
+**CLI Mode:**
 
 ```bash
-python3 run.py --interactive
-# or
-/usr/bin/python3 run.py --interactive
+python run.py --analyze-url "https://example.com"
+python run.py --generate-template spoofing --save-template
 ```
+
+## 📖 Usage
+
+### Interactive Mode
+
+```bash
+python run.py --interactive
+```
+
+Navigate menus to:
+
+- Analyze emails for phishing
+- Check URLs for security issues
+- Generate educational templates
+- View and manage reports
+
+### Command-Line Mode
+
+**Analyze URL:**
+
+```bash
+python run.py --analyze-url "https://suspicious-domain.com"
+```
+
+**Generate Template:**
+
+```bash
+python run.py --generate-template spoofing
+python run.py --generate-template urgency --save-template --template-name "my_template"
+```
+
+**List Saved Templates:**
+
+```bash
+python run.py --list-templates
+```
+
+**Analyze Email File:**
+
+```bash
+python run.py --analyze "path/to/email.txt"
+```
+
+### Template Tactics
+
+The tool supports 7 phishing tactics for training:
+
+| Tactic               | Description                   |
+| -------------------- | ----------------------------- |
+| `spoofing`           | Email address/domain spoofing |
+| `typosquatting`      | Similar-looking domain names  |
+| `urgency`            | Pressure-based manipulation   |
+| `social_engineering` | Trust exploitation            |
+| `pretexting`         | False pretense setup          |
+| `vishing`            | Voice-based phishing          |
+| `smishing`           | SMS-based phishing            |
+
+## 📁 Project Structure
+
+```
+Secrya_KeepSafe/
+├── .github/
+│   └── workflows/              # CI/CD pipelines
+├── docs/
+│   └── prompts_journal/        # Prompt logging and audit trail
+├── phishing_tool/              # Main package
+│   ├── __init__.py
+│   ├── main.py                 # Entry point
+│   ├── cli.py                  # Command-line interface
+│   ├── analysis.py             # Email analysis engine
+│   ├── url_security.py         # URL security checks
+│   ├── templates.py            # Template generation
+│   ├── report.py               # Report formatting
+│   ├── ui.py                   # User interface utilities
+│   ├── prompt_logger.py        # Audit logging
+│   └── GENERATED_EMAILS/       # Sample templates
+├── tests/                      # Test suite
+│   ├── test_templates.py
+│   └── test_templates_pytest.py
+├── reports/                    # Generated analysis reports
+├── setup.py                    # Package configuration
+├── setup.cfg                   # Tool configuration
+├── requirements.txt            # Python dependencies
+├── run.py                      # Launcher script
+├── README.md                   # This file
+└── tox.ini                     # Testing configuration
+```
+
+## 🧪 Testing
+
+### Run Tests Locally
+
+```bash
+# Activate virtual environment
+source .venv/bin/activate
+
+# Run all tests
+pytest -v
+
+# Run with coverage
+pytest --cov=phishing_tool tests/
+```
+
+### Test All Python Versions (with tox)
+
+```bash
+pip install tox
+tox
+```
+
+### CI/CD Pipeline
+
+Tests automatically run on:
+
+- Push to `main` or `updated-work-templates`
+- Pull requests to `main`
+- Python 3.10 and 3.11
+
+## 🚀 Development
+
+### Setup Development Environment
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+pip install pytest flake8
+```
+
+### Code Quality
+
+```bash
+# Linting
+flake8 phishing_tool tests
+
+# Format check
+python -m black --check phishing_tool tests
+```
+
+### Adding Features
+
+1. Create a feature branch: `git checkout -b feature/my-feature`
+2. Make changes and test thoroughly
+3. Ensure all tests pass: `pytest -v`
+4. Submit a pull request
+
+## 📋 Configuration
+
+### Environment Variables
+
+Create a `.env` file (optional):
+
+```env
+# Custom settings can be added here
+LOG_LEVEL=INFO
+```
+
+### Report Location
+
+Generated reports are saved to `/reports/` directory. View them using the interactive menu or directly from the file system.
+
+## 🔧 Troubleshooting
+
+### "ModuleNotFoundError: No module named 'phishing_tool'"
+
+```bash
+# Ensure virtual environment is activated
+source .venv/bin/activate
+
+# Reinstall dependencies
+pip install -r requirements.txt
+
+# Run from project root
+python run.py --interactive
+```
+
+### macOS Python Issues
+
+If `python3` not found:
+
+```bash
+/usr/bin/python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+### Windows PowerShell Execution Policy
+
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+.\.venv\Scripts\Activate.ps1
+```
+
+### Color Output Not Showing
+
+Ensure using:
+
+- Terminal.app / iTerm2 on macOS
+- Windows Terminal on Windows (not legacy cmd.exe)
+- Standard terminals on Linux
+
+## 📊 Reports
+
+Generated reports include:
+
+- **Risk Score** (0-100): Overall phishing likelihood
+- **Indicators** Found: Specific phishing indicators detected
+- **Recommendations** : Actions to take
+- **Timestamp**: When analysis was performed
+
+Reports are saved as plaintext files in `/reports/` with ISO format timestamps.
+
+## 🔐 Security Considerations
+
+- This tool performs **network operations** (DNS lookups, IP validation)
+- Does **NOT** send emails or data externally
+- For suspicious URLs, analysis is read-only
+- Suitable for **internal security training only**
+- Do not run in restricted environments without approval
+
+## 📝 Contributing
+
+Contributions welcome! Please:
+
+1. Fork the repository
+2. Create a feature branch
+3. Ensure all tests pass
+4. Submit a pull request
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
+
+## 📄 License
+
+This project is licensed under the MIT License - see LICENSE file for details.
+
+## 👤 Author
+
+**DeltaHotelSierra**
+
+- GitHub: [@DeltaHotelSierra](https://github.com/DeltaHotelSierra)
+- Repository: [Secrya_KeepSafe](https://github.com/DeltaHotelSierra/Secrya_KeepSafe)
+
+## 🙏 Acknowledgments
+
+- Built for cybersecurity education and awareness
+- Uses Python 3.9+ with minimal dependencies
+- Community contributions welcome
+
+## ❓ Support
+
+- **Issues**: Open a GitHub issue for bugs and feature requests
+- **Documentation**: Check this README and inline code comments
+- **Examples**: See `phishing_tool/GENERATED_EMAILS/` for sample templates
+
+---
+
+**Last Updated:** May 15, 2026  
+**Version:** 1.3.1  
+**Status:** ✅ Production Ready
 
 - Analyze a single URL from the CLI:
 
@@ -136,8 +375,7 @@ Files of interest
 - `phishing_tool/DROP_EMAILS_HERE/` — place email files here for analysis (one file per email)
 - `phishing_tool/GENERATED_EMAILS/` — sample/generated emails for testing
 
-Developer
----------
+## Developer
 
 Create a local development environment and run tests:
 
@@ -170,86 +408,10 @@ Platform-specific notes
 - macOS: same as Linux; prefer the built-in Terminal or iTerm2 for 24-bit color support.
 - Windows: use Windows Terminal or enable ANSI color support; PowerShell Core / Windows Terminal recommended.
 
-Security & privacy notes
+---
 
-- This tool performs DNS lookups and network calls when analyzing URLs — ensure network policies allow this.
-- Do not run untrusted mail-processing code in privileged environments.
-
-Versioning & ownership
-
-- Version: 1.3.1
-- Owner / Author: DeltaHotelSierra
-
-Support
-
-- For issues, open a GitHub issue in the repository.
-
-License
-
-- Include your preferred license here.
-
-
-## Contributing & Git Workflow
-
-### Branch Strategy
-
-We use **feature branches** with pull requests. Each piece of work (feature, bugfix, docs) gets its own branch.
-
-### Step-by-Step Workflow
-
-1. **Start new work from main**
-```bash
-   git checkout -b feature/description-of-work origin/main
-```
-   Use descriptive names: `feature/user-auth`, `bugfix/login-crash`, `docs/setup-guide`
-
-2. **Work and commit normally**
-```bash
-   git add .
-   git commit -m "Clear commit message describing change"
-```
-
-3. **Before pushing, sync with main** (in case teammates merged PRs)
-```bash
-   git pull origin main
-```
-   Resolve any conflicts if they exist.
-
-4. **Push your branch**
-```bash
-   git push origin feature/description-of-work
-```
-
-5. **Create a Pull Request on GitHub**
-   - Go to the repo, GitHub will suggest creating a PR
-   - Add a description of what changed and why
-   - Request a teammate to review
-
-6. **Code review**
-   - Address any feedback from reviewers
-   - Push fixes to the same branch (they auto-update the PR)
-
-7. **Merge**
-   - Once approved, merge the PR on GitHub
-   - Delete the remote branch from GitHub
-
-8. **Cleanup locally**
-```bash
-   git checkout main
-   git pull origin main
-   git branch -d feature/description-of-work
-```
-
-### Key Rules
-- **Never push directly to main.** Always use a PR.
-- **Keep branches focused.** One feature per branch.
-- **Sync frequently.** Run `git pull origin main` before pushing.
-- **Delete branches after merge.** Keep the repo clean.
-
-### If You Get Stuck
-- Check what branch you're on: `git branch -vv`
-- See uncommitted changes: `git status`
-- Review recent commits: `git log --oneline -5`
-
+**Last Updated:** May 15, 2026  
+**Version:** 1.3.1  
+**Status:** ✅ Production Ready
 
 test

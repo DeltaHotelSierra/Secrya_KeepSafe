@@ -2,9 +2,9 @@ name: Python tests
 
 on:
   push:
-    branches: [ main, updated-work-templates ]
+    branches: [main, updated-work-templates]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   test:
