@@ -84,13 +84,15 @@ def _risk_color_for_score(risk_score) -> str:
 
 def format_risk_line(risk_level: str, risk_score) -> str:
     """Format the risk line with color based on the numeric score."""
+    # Default: return colored line. The caller may strip colors by passing
+    # `plain_text=True` into the higher-level formatter.
     color = _risk_color_for_score(risk_score)
     score_text = "?" if risk_score is None else risk_score
     line = f"Risk Level: {risk_level} ({score_text}/10)"
     return f"{color}{line}{RESET_COLOR}" if color else line
 
 
-def _build_report_lines(title: str, analysis_result: dict, source_label: str | None = None) -> list:
+def _build_report_lines(title: str, analysis_result: dict, source_label: str | None = None, plain_text: bool = False) -> list:
     """Build the shared report body for email and URL analysis."""
     risk_level = str(analysis_result.get("risk_level") or "UNKNOWN")
     risk_score = analysis_result.get("risk_score")
@@ -100,7 +102,15 @@ def _build_report_lines(title: str, analysis_result: dict, source_label: str | N
     lines = [title, "=" * len(title)]
     if source_label:
         lines.append(source_label)
-    lines.append(format_risk_line(risk_level, risk_score))
+    # When plain_text is requested, avoid ANSI color codes by not wrapping
+    # the risk line with color sequences.
+    if plain_text:
+        # format_risk_line currently returns a colored string; recreate the
+        # plain line here to avoid adding color codes.
+        score_text = "?" if risk_score is None else risk_score
+        lines.append(f"Risk Level: {risk_level} ({score_text}/10)")
+    else:
+        lines.append(format_risk_line(risk_level, risk_score))
     lines.append("")
     lines.append("DETECTED INDICATORS:")
     if indicators:
@@ -119,22 +129,22 @@ def _build_report_lines(title: str, analysis_result: dict, source_label: str | N
     return lines
 
 
-def format_report(analysis_result: dict, email_file: str | None = None) -> str:
+def format_report(analysis_result: dict, email_file: str | None = None, plain_text: bool = False) -> str:
     """Format email analysis results into a printable report string."""
     ok, err = _ensure_analysis_result(analysis_result)
     if not ok:
         return f"Error: {err}"
     source_label = f"File: {email_file}" if email_file else None
-    return "\n".join(_build_report_lines("PHISHING ANALYSIS REPORT", analysis_result, source_label))
+    return "\n".join(_build_report_lines("PHISHING ANALYSIS REPORT", analysis_result, source_label, plain_text=plain_text))
 
 
-def format_url_report(analysis_result: dict, url: str | None = None) -> str:
+def format_url_report(analysis_result: dict, url: str | None = None, plain_text: bool = False) -> str:
     """Format URL analysis results into a printable report string."""
     ok, err = _ensure_analysis_result(analysis_result)
     if not ok:
         return f"Error: {err}"
     source_label = f"URL: {url}" if url else None
-    return "\n".join(_build_report_lines("URL SCAM ANALYSIS REPORT", analysis_result, source_label))
+    return "\n".join(_build_report_lines("URL SCAM ANALYSIS REPORT", analysis_result, source_label, plain_text=plain_text))
 
 
 def _slugify(value: str) -> str:
