@@ -146,3 +146,30 @@ Jonathan Bam
 Refactor the save block in generate_template to avoid filename collisions 
 by checking if the file already exists before writing, and use local 
 timezone instead of UTC in the timestamp.
+
+# 16th Prompt
+
+Jonathan Bam
+
+In report.py, replace all datetime.utcnow() calls with 
+datetime.now(timezone.utc) and add timezone to the imports. 
+utcnow() is deprecated in Python 3.12+.
+
+# 17th Prompt
+
+Jonathan Bam
+
+In report.py, update _ensure_analysis_result() to also validate 
+that risk_level is one of "HIGH", "MEDIUM", "LOW" and that 
+risk_score is either None or a number between 0 and 10. 
+Return a specific error message string instead of a generic 
+"Invalid analysis result format" when validation fails.
+
+# 18th Prompt
+
+Jonathan Bam
+
+In report.py, add a plain_text parameter (default False) to 
+format_report() and format_url_report(). When True, skip all 
+ANSI color codes in the output so reports saved to .txt files 
+via save_report() are human-readable without escape characters.
