@@ -1,5 +1,6 @@
 """Main entry point for the Phishing Analysis Tool."""
 import sys
+from pathlib import Path
 
 try:
     from . import ui, cli, analysis, templates, report, prompt_logger, url_security
@@ -28,16 +29,27 @@ def main() -> None:
                 return
             content = open(args.analyze, encoding="utf-8").read()
             result = analysis.analyze_email(content)
-            formatted = report.format_report(result, args.analyze)
+            # Show colored output but save a plain-text copy without ANSI codes
+            formatted = report.format_report(result, args.analyze, plain_text=False)
             print(formatted)
+            plain_for_save = report.format_report(result, args.analyze, plain_text=True)
+            saved_path = report.save_report(plain_for_save, f"email_{Path(args.analyze).stem}")
+            ui.print_success(f"Report saved to: {saved_path}")
+            return
         elif args.analyze_url:
             url_result = url_security.analyze_url_security(args.analyze_url)
             formatted = url_security.generate_url_security_report(
                 url_result, args.analyze_url)
             print(formatted)
+            # Save plain-text copy of the URL report
+            try:
+                plain_url = report.format_url_report(url_result, args.analyze_url, plain_text=True)
+            except Exception:
+                plain_url = formatted
             saved_path = report.save_report(
-                formatted, f"url_{url_result['domain'].replace('.', '_')}")
+                plain_url, f"url_{url_result['domain'].replace('.', '_')}")
             ui.print_success(f"Report saved to: {saved_path}")
+            return
         elif args.generate_template:
             # Support optional saving of templates to GENERATED_EMAILS/
             save_flag = getattr(args, "save_template", False)
