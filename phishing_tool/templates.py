@@ -48,13 +48,19 @@ def generate_template(tactic: str, *, save: bool = False, name: Optional[str] = 
     """Return a plain-text educational template for the given tactic.
 
     Args:
-        tactic: One of 'spoofing', 'typosquatting', 'urgency', 'social_engineering'
-        save: If True, write the generated template to `phishing_tool/GENERATED_EMAILS/`.
-        name: Optional filename prefix for the saved file.
+        tactic (str): One of 'spoofing', 'typosquatting', 'urgency', or
+            'social_engineering' (case-insensitive). Required.
+        save (bool): If True, write the generated template to
+            `phishing_tool/GENERATED_EMAILS/`. Defaults to False.
+        name (Optional[str]): Optional filename prefix to use when saving the
+            generated template. If omitted the tactic name is used.
 
     Returns:
-        str: Formatted template text. If `save=True` the returned string will have a
-        final line indicating the saved file path.
+        str: Formatted template text. If ``save=True`` the returned string
+        includes a final line indicating the saved file path.
+
+    Raises:
+        ValueError: If ``tactic`` is None or not a supported tactic.
     """
     if tactic is None:
         raise ValueError("tactic must be provided (supported: " + ", ".join(get_supported_tactics()) + ")")
@@ -172,7 +178,11 @@ def generate_template(tactic: str, *, save: bool = False, name: Optional[str] = 
 
 
 def get_supported_tactics() -> list:
-    """Return the list of supported tactic names (strings)."""
+    """Return the list of supported tactic names.
+
+    Returns:
+        list[str]: Supported tactic names as lowercase strings.
+    """
     return [
         "spoofing",
         "typosquatting",
@@ -185,34 +195,36 @@ def get_supported_tactics() -> list:
 
 
 def list_generated_templates() -> list:
-    """Scan the GENERATED_EMAILS directory and return a list of saved template
-    files with their creation timestamps.
+    """Scan the GENERATED_EMAILS directory and return saved templates with timestamps.
+
+    The function inspects files in the `GENERATED_EMAILS` directory and returns
+    a list of dictionaries with the filename and the creation timestamp. Where
+    the platform exposes a birth/creation time this is preferred; otherwise the
+    file modification time is used. Timestamps are presented as local-time ISO
+    8601 strings including the timezone offset (e.g. ``2026-05-14T10:19:11+02:00``).
 
     Returns:
-        list of dict objects: [{'name': filename, 'created_iso': 'YYYY-MM-DDTHH:MM:SSZ'}, ...]
-        Sorted newest first by file modification time.
+        list[dict]: Each dict has keys ``name`` and ``created_iso``. The list is
+        sorted newest-first by the chosen creation timestamp.
     """
     d = GENERATED_DIR
     if not d.exists():
         return []
     files = [p for p in d.iterdir() if p.is_file()]
 
-    # Determine a creation timestamp for each file. On macOS a `st_birthtime`
-    # attribute is typically available; otherwise fall back to mtime. Use UTC
-    # ISO format for the returned timestamps.
     def _created_ts(path: Path) -> float:
+        """Return the best available creation timestamp for ``path`` as POSIX float."""
         st = path.stat()
-        # Some platforms (macOS) expose st_birthtime for creation time
         if hasattr(st, "st_birthtime"):
             return float(st.st_birthtime)
-        # Fallback to mtime
         return float(st.st_mtime)
 
     files.sort(key=_created_ts, reverse=True)
-    out = []
+    out: list[dict] = []
     for p in files:
         ts = _created_ts(p)
-        created_iso = datetime.utcfromtimestamp(ts).strftime("%Y-%m-%dT%H:%M:%SZ")
+        # Convert to local timezone ISO 8601 with offset
+        created_iso = datetime.fromtimestamp(ts).astimezone().isoformat(timespec="seconds")
         out.append({"name": p.name, "created_iso": created_iso})
     return out
 

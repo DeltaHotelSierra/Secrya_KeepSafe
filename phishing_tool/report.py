@@ -1,6 +1,6 @@
 """Format and persist phishing analysis reports."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 import re
 
@@ -124,7 +124,7 @@ def _slugify(value: str) -> str:
 def save_report(report_text: str, report_name: str) -> Path:
     """Save a report to the reports folder and return the created path."""
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
-    timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S_%f")
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S_%f")
     stem = _slugify(report_name)
     filename = f"{stem}_{timestamp}.txt"
     report_path = REPORTS_DIR / filename
