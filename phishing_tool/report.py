@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 import re
 
@@ -19,7 +19,28 @@ GREEN_COLOR = "\033[38;2;0;200;0m"
 
 def _ensure_analysis_result(analysis_result: dict) -> bool:
     """Return True when the analysis payload looks like a report result."""
-    return isinstance(analysis_result, dict) and "risk_level" in analysis_result
+    # Basic shape check
+    if not isinstance(analysis_result, dict):
+        return False, "analysis_result must be a dict"
+    if "risk_level" not in analysis_result:
+        return False, "missing required field: risk_level"
+
+    # Validate risk_level
+    rl = str(analysis_result.get("risk_level") or "").upper()
+    if rl not in ("HIGH", "MEDIUM", "LOW"):
+        return False, "risk_level must be one of: HIGH, MEDIUM, LOW"
+
+    # Validate risk_score (None or number between 0 and 10)
+    score = analysis_result.get("risk_score")
+    if score is None:
+        return True, None
+    try:
+        val = float(score)
+    except (TypeError, ValueError):
+        return False, "risk_score must be numeric or None"
+    if val < 0 or val > 10:
+        return False, "risk_score must be between 0 and 10"
+    return True, None
 
 
 def _recommendations_for_level(risk_level: str) -> list:
@@ -65,13 +86,15 @@ def _risk_color_for_score(risk_score) -> str:
 
 def format_risk_line(risk_level: str, risk_score) -> str:
     """Format the risk line with color based on the numeric score."""
+    # Default: return colored line. The caller may strip colors by passing
+    # `plain_text=True` into the higher-level formatter.
     color = _risk_color_for_score(risk_score)
     score_text = "?" if risk_score is None else risk_score
     line = f"Risk Level: {risk_level} ({score_text}/10)"
     return f"{color}{line}{RESET_COLOR}" if color else line
 
 
-def _build_report_lines(title: str, analysis_result: dict, source_label: str | None = None) -> list:
+def _build_report_lines(title: str, analysis_result: dict, source_label: str | None = None, plain_text: bool = False) -> list:
     """Build the shared report body for email and URL analysis."""
     risk_level = str(analysis_result.get("risk_level") or "UNKNOWN")
     risk_score = analysis_result.get("risk_score")
@@ -81,7 +104,15 @@ def _build_report_lines(title: str, analysis_result: dict, source_label: str | N
     lines = [title, "=" * len(title)]
     if source_label:
         lines.append(source_label)
-    lines.append(format_risk_line(risk_level, risk_score))
+    # When plain_text is requested, avoid ANSI color codes by not wrapping
+    # the risk line with color sequences.
+    if plain_text:
+        # format_risk_line currently returns a colored string; recreate the
+        # plain line here to avoid adding color codes.
+        score_text = "?" if risk_score is None else risk_score
+        lines.append(f"Risk Level: {risk_level} ({score_text}/10)")
+    else:
+        lines.append(format_risk_line(risk_level, risk_score))
     lines.append("")
     lines.append("DETECTED INDICATORS:")
     if indicators:
@@ -100,20 +131,22 @@ def _build_report_lines(title: str, analysis_result: dict, source_label: str | N
     return lines
 
 
-def format_report(analysis_result: dict, email_file: str | None = None) -> str:
+def format_report(analysis_result: dict, email_file: str | None = None, plain_text: bool = False) -> str:
     """Format email analysis results into a printable report string."""
-    if not _ensure_analysis_result(analysis_result):
-        return "Error: Invalid analysis result format"
+    ok, err = _ensure_analysis_result(analysis_result)
+    if not ok:
+        return f"Error: {err}"
     source_label = f"File: {email_file}" if email_file else None
-    return "\n".join(_build_report_lines("PHISHING ANALYSIS REPORT", analysis_result, source_label))
+    return "\n".join(_build_report_lines("PHISHING ANALYSIS REPORT", analysis_result, source_label, plain_text=plain_text))
 
 
-def format_url_report(analysis_result: dict, url: str | None = None) -> str:
+def format_url_report(analysis_result: dict, url: str | None = None, plain_text: bool = False) -> str:
     """Format URL analysis results into a printable report string."""
-    if not _ensure_analysis_result(analysis_result):
-        return "Error: Invalid analysis result format"
+    ok, err = _ensure_analysis_result(analysis_result)
+    if not ok:
+        return f"Error: {err}"
     source_label = f"URL: {url}" if url else None
-    return "\n".join(_build_report_lines("URL SCAM ANALYSIS REPORT", analysis_result, source_label))
+    return "\n".join(_build_report_lines("URL SCAM ANALYSIS REPORT", analysis_result, source_label, plain_text=plain_text))
 
 
 def _slugify(value: str) -> str:
@@ -126,7 +159,7 @@ def _slugify(value: str) -> str:
 def save_report(report_text: str, report_name: str) -> Path:
     """Save a report to the reports folder and return the created path."""
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
-    timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S_%f")
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S_%f")
     stem = _slugify(report_name)
     filename = f"{stem}_{timestamp}.txt"
     report_path = REPORTS_DIR / filename

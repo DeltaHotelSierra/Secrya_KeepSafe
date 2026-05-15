@@ -136,6 +136,26 @@ Files of interest
 - `phishing_tool/DROP_EMAILS_HERE/` — place email files here for analysis (one file per email)
 - `phishing_tool/GENERATED_EMAILS/` — sample/generated emails for testing
 
+Developer
+---------
+
+Create a local development environment and run tests:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt
+pytest -q
+```
+
+Optional: use tox to test across Python versions (requires tox installed and multiple Python interpreters available):
+
+```bash
+pip install tox
+tox
+```
+
 Screenshots
 
 - Add screenshots in this section. Example placeholders:

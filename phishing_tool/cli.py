@@ -41,6 +41,23 @@ def setup_parser() -> argparse.ArgumentParser:
         help="Generate educational template: spoofing/typosquatting/urgency/social_engineering",
     )
     parser.add_argument(
+        "--save-template",
+        action="store_true",
+        dest="save_template",
+        help="When used with --generate-template, save the generated template to GENERATED_EMAILS/",
+    )
+    parser.add_argument(
+        "--template-name",
+        dest="template_name",
+        help="Optional filename prefix when saving a generated template",
+    )
+    parser.add_argument(
+        "--list-templates",
+        action="store_true",
+        dest="list_templates",
+        help="List generated templates saved in GENERATED_EMAILS/",
+    )
+    parser.add_argument(
         "--interactive",
         action="store_true",
         dest="interactive",
@@ -107,9 +124,11 @@ def _analyze_email_file(path: Path) -> None:
     """Analyze an email file and save the report."""
     content = path.read_text(encoding="utf-8")
     result = analysis.analyze_email(content)
-    formatted = report.format_report(result, path.name)
+    # Show colored output to terminal but save a plain-text copy without ANSI codes
+    formatted = report.format_report(result, path.name, plain_text=False)
     print(formatted)
-    saved_path = _save_report(formatted, f"email_{path.stem}")
+    plain_for_save = report.format_report(result, path.name, plain_text=True)
+    saved_path = _save_report(plain_for_save, f"email_{path.stem}")
     ui.print_success(f"Report saved to: {saved_path}")
 
 
@@ -190,8 +209,15 @@ def _analyze_url_submenu() -> None:
     # Format comprehensive report
     url_report = url_security.generate_url_security_report(result, url)
     print(url_report)
+    # The URL report generator may contain ANSI; produce a plain-text copy
+    # for saving using the report.format_url_report when possible.
+    try:
+        plain_url_report = report.format_url_report(result, url, plain_text=True)
+    except Exception:
+        # Fallback to the generated text if formatting fails
+        plain_url_report = url_report
     saved_path = _save_report(
-        url_report, f"url_{result['domain'].replace('.', '_')}")
+        plain_url_report, f"url_{result['domain'].replace('.', '_')}")
     ui.print_success(f"Report saved to: {saved_path}")
 
 
