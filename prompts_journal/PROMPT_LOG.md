@@ -100,54 +100,8 @@ daniel santos
 
 # 10th Prompt
 
-Jonathan Bam
 
-Read the README and make it work on my machine and give me the command to run the program
-
-# 11th Prompt
-
-Jonathan Bam
-
-i want a simple config system so we don’t hardcode everything. create a config file (like config.json or .env) where we can set things like: default reports folder name, logs folder name, risk thresholds, and any api keys if we add them later. update the code so it reads from this config at startup and falls back to safe defaults if the file is missing or broken. document each config option in the readme so someone new can customize the tool without touching the code.
+daniel sanrtos 
 
 
-# 12th Prompt
-
-Jonathan Bam
-
-Add new tactic types to the generate_template function in templates.py: 
-'pretexting', 'vishing', and 'smishing'. Follow the exact same format 
-as the existing tactics with EDUCATIONAL TEMPLATE header, examples, 
-explanation, and defense sections.
-
-
-# 13th Prompt
-
-Jonathan Bam
-
-Improve the generate_template function to validate inputs more robustly. 
-Strip whitespace, raise a ValueError with a helpful message for unknown 
-tactics instead of returning an error string, and add a get_supported_tactics() 
-helper function that returns a list of all valid tactic names.
-
-
-# 14th Prompt
-
-Jonathan Bam
-
-Add a list_generated_templates() function to templates.py that scans the 
-GENERATED_EMAILS directory and returns a list of saved template filenames 
-with their creation timestamps, sorted newest first.
-
-# 15th Prompt
-
-Jonathan Bam
-
-Refactor the save block in generate_template to avoid filename collisions 
-by checking if the file already exists before writing, and use local 
-timezone instead of UTC in the timestamp.
-
-
-daniel sanrtos
-
-update README with instructions for downloading and running
+update read.me file for instructions for downloading and running

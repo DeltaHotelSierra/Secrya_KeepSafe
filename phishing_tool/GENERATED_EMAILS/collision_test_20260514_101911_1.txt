@@ -1,8 +1,0 @@
-EDUCATIONAL TEMPLATE: Vishing (Voice Phishing)
---------------------------------------------------
-Example voicemail/call script:
-  Caller: Bank Security
-  Message: We need to confirm recent transactions; please call back and verify your card number.
-
-Explanation: Attackers use phone calls to impersonate trusted organizations and extract sensitive information.
-Defense: Do not provide sensitive data over unsolicited calls; hang up and call the official number from your account statement.
