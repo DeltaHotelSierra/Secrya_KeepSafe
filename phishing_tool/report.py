@@ -17,7 +17,28 @@ GREEN_COLOR = "\033[38;2;0;200;0m"
 
 def _ensure_analysis_result(analysis_result: dict) -> bool:
     """Return True when the analysis payload looks like a report result."""
-    return isinstance(analysis_result, dict) and "risk_level" in analysis_result
+    # Basic shape check
+    if not isinstance(analysis_result, dict):
+        return False, "analysis_result must be a dict"
+    if "risk_level" not in analysis_result:
+        return False, "missing required field: risk_level"
+
+    # Validate risk_level
+    rl = str(analysis_result.get("risk_level") or "").upper()
+    if rl not in ("HIGH", "MEDIUM", "LOW"):
+        return False, "risk_level must be one of: HIGH, MEDIUM, LOW"
+
+    # Validate risk_score (None or number between 0 and 10)
+    score = analysis_result.get("risk_score")
+    if score is None:
+        return True, None
+    try:
+        val = float(score)
+    except (TypeError, ValueError):
+        return False, "risk_score must be numeric or None"
+    if val < 0 or val > 10:
+        return False, "risk_score must be between 0 and 10"
+    return True, None
 
 
 def _recommendations_for_level(risk_level: str) -> list:
@@ -100,16 +121,18 @@ def _build_report_lines(title: str, analysis_result: dict, source_label: str | N
 
 def format_report(analysis_result: dict, email_file: str | None = None) -> str:
     """Format email analysis results into a printable report string."""
-    if not _ensure_analysis_result(analysis_result):
-        return "Error: Invalid analysis result format"
+    ok, err = _ensure_analysis_result(analysis_result)
+    if not ok:
+        return f"Error: {err}"
     source_label = f"File: {email_file}" if email_file else None
     return "\n".join(_build_report_lines("PHISHING ANALYSIS REPORT", analysis_result, source_label))
 
 
 def format_url_report(analysis_result: dict, url: str | None = None) -> str:
     """Format URL analysis results into a printable report string."""
-    if not _ensure_analysis_result(analysis_result):
-        return "Error: Invalid analysis result format"
+    ok, err = _ensure_analysis_result(analysis_result)
+    if not ok:
+        return f"Error: {err}"
     source_label = f"URL: {url}" if url else None
     return "\n".join(_build_report_lines("URL SCAM ANALYSIS REPORT", analysis_result, source_label))
 
